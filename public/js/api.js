@@ -93,23 +93,73 @@ class ApiService {
 
     // Dashboard endpoints
     async getDashboardData() {
-        return this.get('/dashboard');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/dashboard', params);
     }
 
     async getKPIData() {
-        return this.get('/dashboard/kpi');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/dashboard/kpi', params);
     }
 
     async getRevenueTrends(period = 30) {
-        return this.get('/dashboard/revenue-trends', { period });
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = { period };
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/dashboard/revenue-trends', params);
     }
 
     async getExpenseBreakdown() {
-        return this.get('/dashboard/expense-breakdown');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/dashboard/expense-breakdown', params);
+    }
+
+    // Companies endpoints
+    async getCompanies(params = {}) {
+        return this.get('/companies', params);
+    }
+
+    async getCompany(id) {
+        return this.get(`/companies/${id}`);
+    }
+
+    async createCompany(companyData) {
+        return this.post('/companies', companyData);
+    }
+
+    async updateCompany(id, companyData) {
+        return this.put(`/companies/${id}`, companyData);
+    }
+
+    async deleteCompany(id) {
+        return this.delete(`/companies/${id}`);
     }
 
     // Accounts endpoints
     async getAccounts(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/accounts', params);
     }
 
@@ -118,6 +168,11 @@ class ApiService {
     }
 
     async createAccount(accountData) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            accountData.company_id = companyId;
+        }
         return this.post('/accounts', accountData);
     }
 
@@ -131,6 +186,11 @@ class ApiService {
 
     // Transactions endpoints
     async getTransactions(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/transactions', params);
     }
 
@@ -139,6 +199,11 @@ class ApiService {
     }
 
     async createTransaction(transactionData) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            transactionData.company_id = companyId;
+        }
         return this.post('/transactions', transactionData);
     }
 
@@ -151,37 +216,81 @@ class ApiService {
     }
 
     async getRecentTransactions(limit = 10) {
-        return this.get('/transactions/recent', { limit });
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = { limit };
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/transactions/recent', params);
     }
 
     // Reports endpoints
     async getProfitLoss(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/reports/profit-loss', params);
     }
 
     async getBalanceSheet(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/reports/balance-sheet', params);
     }
 
     async getCashFlow(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/reports/cash-flow', params);
     }
 
     async getTrialBalance() {
-        return this.get('/reports/trial-balance');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/reports/trial-balance', params);
     }
 
     // Analytics endpoints
     async getAnalytics(params = {}) {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        if (companyId) {
+            params.company_id = companyId;
+        }
         return this.get('/analytics', params);
     }
 
     async getCategoryAnalytics() {
-        return this.get('/analytics/categories');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/analytics/categories', params);
     }
 
     async getAccountAnalytics() {
-        return this.get('/analytics/accounts');
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        const params = {};
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/analytics/accounts', params);
     }
 }
 

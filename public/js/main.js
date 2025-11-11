@@ -7,11 +7,14 @@ class App {
     constructor() {
         this.isInitialized = false;
         this.theme = localStorage.getItem('theme') || 'light';
+        this.selectedCompanyId = localStorage.getItem('selectedCompanyId') || null;
+        this.selectedCompanyName = localStorage.getItem('selectedCompanyName') || null;
+        this.companies = [];
         this.init();
     }
 
     /**
-     * Initialize the application
+     * Initialize application
      */
     async init() {
         try {
@@ -20,6 +23,9 @@ class App {
             
             // Initialize theme
             this.initTheme();
+            
+            // Initialize company context
+            await this.initCompanyContext();
             
             // Set up global event listeners
             this.setupGlobalEventListeners();
@@ -70,6 +76,121 @@ class App {
                 }
             });
         }
+    }
+
+    /**
+     * Initialize company context
+     */
+    async initCompanyContext() {
+        try {
+            // Load companies for the selector
+            this.companies = await apiService.getCompanies();
+            this.setupCompanySelector();
+            this.updateCompanyDisplay();
+        } catch (error) {
+            console.error('Failed to initialize company context:', error);
+            // Continue without company context for now
+        }
+    }
+
+    /**
+     * Setup company selector in navigation
+     */
+    setupCompanySelector() {
+        const selector = document.getElementById('current-company');
+        if (!selector) return;
+
+        // Clear existing options
+        selector.innerHTML = '<option value="">Select Company</option>';
+
+        // Add companies to selector
+        this.companies.forEach(company => {
+            if (company.is_active) {
+                const option = document.createElement('option');
+                option.value = company.company_id;
+                option.textContent = company.company_name;
+                selector.appendChild(option);
+            }
+        });
+
+        // Set selected company
+        if (this.selectedCompanyId) {
+            selector.value = this.selectedCompanyId;
+        }
+
+        // Add change event listener
+        selector.addEventListener('change', (e) => {
+            this.handleCompanyChange(e.target.value);
+        });
+    }
+
+    /**
+     * Handle company change
+     */
+    async handleCompanyChange(companyId) {
+        if (!companyId) {
+            this.selectedCompanyId = null;
+            this.selectedCompanyName = null;
+            localStorage.removeItem('selectedCompanyId');
+            localStorage.removeItem('selectedCompanyName');
+            return;
+        }
+
+        const company = this.companies.find(c => c.company_id == companyId);
+        if (!company) return;
+
+        this.selectedCompanyId = companyId;
+        this.selectedCompanyName = company.company_name;
+        localStorage.setItem('selectedCompanyId', companyId);
+        localStorage.setItem('selectedCompanyName', company.company_name);
+
+        this.showSuccess(`Switched to ${company.company_name}`);
+        
+        // Reload current page to refresh data with new company context
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+
+    /**
+     * Update company display in UI
+     */
+    updateCompanyDisplay() {
+        // Update page title if company is selected
+        if (this.selectedCompanyName) {
+            const titleElement = document.querySelector('title');
+            if (titleElement) {
+                const originalTitle = titleElement.textContent.replace(' - Accounting System', '');
+                titleElement.textContent = `${originalTitle} - ${this.selectedCompanyName} - Accounting System`;
+            }
+        }
+
+        // Update any company info displays
+        const companyDisplays = document.querySelectorAll('.current-company-name');
+        companyDisplays.forEach(element => {
+            element.textContent = this.selectedCompanyName || 'No Company Selected';
+        });
+    }
+
+    /**
+     * Get current company ID
+     */
+    getCurrentCompanyId() {
+        return this.selectedCompanyId;
+    }
+
+    /**
+     * Get current company name
+     */
+    getCurrentCompanyName() {
+        return this.selectedCompanyName;
+    }
+
+    /**
+     * Check if company is selected
+     */
+    hasSelectedCompany() {
+        return this.selectedCompanyId !== null;
     }
 
     /**
@@ -146,6 +267,12 @@ class App {
         if ((e.ctrlKey || e.metaKey) && e.key === '/') {
             e.preventDefault();
             this.showKeyboardShortcuts();
+        }
+
+        // Ctrl/Cmd + Shift + C for company selector
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            this.focusCompanySelector();
         }
 
         // Escape to close modals
@@ -240,6 +367,17 @@ class App {
     openSearch() {
         // Implement search modal functionality
         console.log('Opening search modal');
+    }
+
+    /**
+     * Focus company selector
+     */
+    focusCompanySelector() {
+        const selector = document.getElementById('current-company');
+        if (selector) {
+            selector.focus();
+            selector.click();
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-docker-compose up -ddocker-compose up -d<?php
+<?php
 
 namespace AccountingSystem\Config;
 
