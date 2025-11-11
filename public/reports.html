@@ -10,79 +10,81 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="nav-brand">
-                <i class="fas fa-chart-line"></i>
-                <span>Accounting System</span>
-            </div>
-            <div class="nav-menu">
-                <div class="company-selector">
-                    <label for="current-company">Company:</label>
-                    <select id="current-company" class="company-select">
-                        <option value="">Loading companies...</option>
-                    </select>
+        <header>
+            <nav class="navbar" role="navigation" aria-label="Main navigation">
+                <div class="nav-brand">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    <span>Accounting System</span>
                 </div>
-                <a href="index.html" class="nav-link">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="accounts.html" class="nav-link">
-                    <i class="fas fa-wallet"></i> Accounts
-                </a>
-                <a href="transactions.html" class="nav-link">
-                    <i class="fas fa-exchange-alt"></i> Transactions
-                </a>
-                <a href="reports.html" class="nav-link active">
-                    <i class="fas fa-chart-bar"></i> Reports
-                </a>
-                <a href="companies.html" class="nav-link">
-                    <i class="fas fa-building"></i> Companies
-                </a>
-                <a href="settings.html" class="nav-link">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-            </div>
-        </nav>
+                <div class="nav-menu">
+                    <div class="company-selector">
+                        <label for="current-company">Company:</label>
+                        <select id="current-company" class="company-select" aria-label="Select company">
+                            <option value="">Loading companies...</option>
+                        </select>
+                    </div>
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt" aria-hidden="true"></i> Dashboard
+                    </a>
+                    <a href="accounts.html" class="nav-link">
+                        <i class="fas fa-wallet" aria-hidden="true"></i> Accounts
+                    </a>
+                    <a href="transactions.html" class="nav-link">
+                        <i class="fas fa-exchange-alt" aria-hidden="true"></i> Transactions
+                    </a>
+                    <a href="reports.html" class="nav-link active" aria-current="page">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i> Reports
+                    </a>
+                    <a href="companies.html" class="nav-link">
+                        <i class="fas fa-building" aria-hidden="true"></i> Companies
+                    </a>
+                    <a href="settings.html" class="nav-link">
+                        <i class="fas fa-cog" aria-hidden="true"></i> Settings
+                    </a>
+                </div>
+            </nav>
+        </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <div class="content-header">
-                <h1>Financial Reports</h1>
-                <p>Generate and view comprehensive financial reports</p>
+            <section class="content-header">
+                <div>
+                    <h1>Financial Reports</h1>
+                    <p>Generate and view comprehensive financial reports</p>
+                </div>
                 <div class="header-actions">
-                    <select id="report-period" class="filter-select">
+                    <label for="report-period" class="visually-hidden">Select report period</label>
+                    <select id="report-period" class="filter-select" aria-label="Select report period">
                         <option value="monthly">Monthly</option>
                         <option value="quarterly">Quarterly</option>
                         <option value="yearly">Yearly</option>
                     </select>
-                    <button class="btn btn-secondary" id="export-reports-btn">
-                        <i class="fas fa-download"></i> Export
+                    <button class="btn btn-secondary" id="export-reports-btn" aria-label="Export reports">
+                        <i class="fas fa-download" aria-hidden="true"></i> Export
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Report Tabs -->
-            <div class="report-tabs">
-                <button class="tab-btn active" data-tab="profit-loss">
-                    <i class="fas fa-chart-line"></i> Profit & Loss
+            <nav class="report-tabs" role="tablist" aria-label="Report types">
+                <button class="tab-btn active" data-tab="profit-loss" role="tab" aria-selected="true" aria-controls="profit-loss-tab">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i> Profit & Loss
                 </button>
-                <button class="tab-btn" data-tab="balance-sheet">
-                    <i class="fas fa-balance-scale"></i> Balance Sheet
+                <button class="tab-btn" data-tab="balance-sheet" role="tab" aria-selected="false" aria-controls="balance-sheet-tab">
+                    <i class="fas fa-balance-scale" aria-hidden="true"></i> Balance Sheet
                 </button>
-                <button class="tab-btn" data-tab="cash-flow">
-                    <i class="fas fa-water"></i> Cash Flow
+                <button class="tab-btn" data-tab="cash-flow" role="tab" aria-selected="false" aria-controls="cash-flow-tab">
+                    <i class="fas fa-water" aria-hidden="true"></i> Cash Flow
                 </button>
-            </div>
+            </nav>
 
             <!-- Profit & Loss Report -->
-            <div id="profit-loss-tab" class="report-tab active">
+            <section id="profit-loss-tab" class="report-tab active" role="tabpanel" aria-labelledby="profit-loss-tab">
                 <div class="report-section">
-                    <div class="report-header">
+                    <header class="report-header">
                         <h3>Profit & Loss Statement</h3>
                         <div class="date-range">
                             <span id="pl-date-range">January 2024</span>
                         </div>
-                    </div>
+                    </header>
                     
                     <div class="report-summary">
                         <div class="summary-item">
@@ -102,23 +104,23 @@
                     <div class="report-charts">
                         <div class="chart-container">
                             <h4>Revenue vs Expenses</h4>
-                            <canvas id="pl-chart"></canvas>
+                            <canvas id="pl-chart" aria-label="Revenue vs expenses chart"></canvas>
                         </div>
                         <div class="chart-container">
                             <h4>Expense Breakdown</h4>
-                            <canvas id="expense-chart"></canvas>
+                            <canvas id="expense-chart" aria-label="Expense breakdown chart"></canvas>
                         </div>
                     </div>
 
                     <div class="report-details">
                         <div class="detail-section">
                             <h4>Revenue Breakdown</h4>
-                            <table class="detail-table">
+                            <table class="detail-table" aria-label="Revenue breakdown details">
                                 <thead>
                                     <tr>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                        <th>Percentage</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">Amount</th>
+                                        <th scope="col">Percentage</th>
                                     </tr>
                                 </thead>
                                 <tbody id="revenue-breakdown">
@@ -129,12 +131,12 @@
 
                         <div class="detail-section">
                             <h4>Expense Breakdown</h4>
-                            <table class="detail-table">
+                            <table class="detail-table" aria-label="Expense breakdown details">
                                 <thead>
                                     <tr>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                        <th>Percentage</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">Amount</th>
+                                        <th scope="col">Percentage</th>
                                     </tr>
                                 </thead>
                                 <tbody id="expense-breakdown">
@@ -144,24 +146,24 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Balance Sheet Report -->
-            <div id="balance-sheet-tab" class="report-tab">
+            <section id="balance-sheet-tab" class="report-tab" role="tabpanel" aria-labelledby="balance-sheet-tab" hidden>
                 <div class="report-section">
-                    <div class="report-header">
+                    <header class="report-header">
                         <h3>Balance Sheet</h3>
                         <div class="date-range">
                             <span id="bs-date-range">As of January 15, 2024</span>
                         </div>
-                    </div>
+                    </header>
 
                     <div class="balance-sheet-layout">
                         <div class="balance-sheet-column">
                             <h4>Assets</h4>
                             <div class="balance-section">
                                 <h5>Current Assets</h5>
-                                <table class="balance-table">
+                                <table class="balance-table" aria-label="Current assets">
                                     <tbody id="current-assets">
                                         <!-- Populated by JavaScript -->
                                     </tbody>
@@ -169,7 +171,7 @@
                             </div>
                             <div class="balance-section">
                                 <h5>Fixed Assets</h5>
-                                <table class="balance-table">
+                                <table class="balance-table" aria-label="Fixed assets">
                                     <tbody id="fixed-assets">
                                         <!-- Populated by JavaScript -->
                                     </tbody>
@@ -185,7 +187,7 @@
                             <h4>Liabilities & Equity</h4>
                             <div class="balance-section">
                                 <h5>Current Liabilities</h5>
-                                <table class="balance-table">
+                                <table class="balance-table" aria-label="Current liabilities">
                                     <tbody id="current-liabilities">
                                         <!-- Populated by JavaScript -->
                                     </tbody>
@@ -193,7 +195,7 @@
                             </div>
                             <div class="balance-section">
                                 <h5>Long-term Liabilities</h5>
-                                <table class="balance-table">
+                                <table class="balance-table" aria-label="Long-term liabilities">
                                     <tbody id="long-term-liabilities">
                                         <!-- Populated by JavaScript -->
                                     </tbody>
@@ -201,7 +203,7 @@
                             </div>
                             <div class="balance-section">
                                 <h5>Equity</h5>
-                                <table class="balance-table">
+                                <table class="balance-table" aria-label="Equity">
                                     <tbody id="equity">
                                         <!-- Populated by JavaScript -->
                                     </tbody>
@@ -214,17 +216,17 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Cash Flow Report -->
-            <div id="cash-flow-tab" class="report-tab">
+            <section id="cash-flow-tab" class="report-tab" role="tabpanel" aria-labelledby="cash-flow-tab" hidden>
                 <div class="report-section">
-                    <div class="report-header">
+                    <header class="report-header">
                         <h3>Cash Flow Statement</h3>
                         <div class="date-range">
                             <span id="cf-date-range">January 2024</span>
                         </div>
-                    </div>
+                    </header>
 
                     <div class="cash-flow-summary">
                         <div class="summary-item">
@@ -248,18 +250,18 @@
                     <div class="report-charts">
                         <div class="chart-container full-width">
                             <h4>Cash Flow Trends</h4>
-                            <canvas id="cash-flow-chart"></canvas>
+                            <canvas id="cash-flow-chart" aria-label="Cash flow trends chart"></canvas>
                         </div>
                     </div>
 
                     <div class="report-details">
                         <div class="detail-section">
                             <h4>Cash Flow Details</h4>
-                            <table class="detail-table">
+                            <table class="detail-table" aria-label="Cash flow details">
                                 <thead>
                                     <tr>
-                                        <th>Category</th>
-                                        <th>Amount</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cash-flow-details">
@@ -269,12 +271,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
+    <div id="toast-container" role="alert" aria-live="polite" aria-atomic="true"></div>
 
     <script src="js/main.js"></script>
     <script src="js/api.js"></script>
