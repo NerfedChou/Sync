@@ -597,6 +597,25 @@ body {
   color: #166534;
 }
 
+/* Chart Styles */
+canvas {
+  max-height: 300px;
+  width: 100% !important;
+  display: block !important;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  min-height: 300px;
+}
+
+.chart-container canvas {
+  height: 300px !important;
+  width: 100% !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .nav-menu {

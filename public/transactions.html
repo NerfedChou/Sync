@@ -39,7 +39,7 @@
             <div class="content-header">
                 <h1>Transactions</h1>
                 <p>Record and manage all financial transactions</p>
-                <button class="btn btn-primary" onclick="openAddTransactionModal()">
+                <button class="btn btn-primary" id="add-transaction-btn">
                     <i class="fas fa-plus"></i> Add Transaction
                 </button>
             </div>
@@ -130,11 +130,11 @@
 
                 <!-- Pagination -->
                 <div class="pagination">
-                    <button class="btn btn-secondary" id="prev-page" onclick="changePage(-1)">
+                    <button class="btn btn-secondary" id="prev-page">
                         <i class="fas fa-chevron-left"></i> Previous
                     </button>
                     <span id="page-info">Page 1 of 1</span>
-                    <button class="btn btn-secondary" id="next-page" onclick="changePage(1)">
+                    <button class="btn btn-secondary" id="next-page">
                         Next <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
@@ -147,7 +147,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">Add Transaction</h3>
-                <button class="close-btn" onclick="closeTransactionModal()">&times;</button>
+                <button class="close-btn" id="close-transaction-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="transaction-form">
@@ -203,7 +203,7 @@
                         </select>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeTransactionModal()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-transaction-btn">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Transaction</button>
                     </div>
                 </form>
@@ -214,6 +214,7 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/transactions.js"></script>
 </body>

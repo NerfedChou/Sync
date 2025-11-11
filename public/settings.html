@@ -259,7 +259,7 @@ Business City, BC 12345</textarea>
                             </div>
                             <div class="form-group">
                                 <label>Backup Codes</label>
-                                <button type="button" class="btn btn-secondary" onclick="generateBackupCodes()">
+                                <button type="button" class="btn btn-secondary" id="generate-backup-codes-btn">
                                     Generate Backup Codes
                                 </button>
                             </div>
@@ -300,10 +300,10 @@ Business City, BC 12345</textarea>
                                 </select>
                             </div>
                             <div class="backup-actions">
-                                <button type="button" class="btn btn-primary" onclick="createBackup()">
+                                <button type="button" class="btn btn-primary" id="create-backup-btn">
                                     <i class="fas fa-download"></i> Create Backup Now
                                 </button>
-                                <button type="button" class="btn btn-secondary" onclick="restoreBackup()">
+                                <button type="button" class="btn btn-secondary" id="restore-backup-btn">
                                     <i class="fas fa-upload"></i> Restore Backup
                                 </button>
                             </div>
@@ -312,10 +312,10 @@ Business City, BC 12345</textarea>
                         <div class="settings-section">
                             <h3>Data Import/Export</h3>
                             <div class="import-export-actions">
-                                <button type="button" class="btn btn-primary" onclick="exportData()">
+                                <button type="button" class="btn btn-primary" id="export-data-btn">
                                     <i class="fas fa-file-export"></i> Export Data
                                 </button>
-                                <button type="button" class="btn btn-secondary" onclick="importData()">
+                                <button type="button" class="btn btn-secondary" id="import-data-btn">
                                     <i class="fas fa-file-import"></i> Import Data
                                 </button>
                             </div>
@@ -334,7 +334,7 @@ Business City, BC 12345</textarea>
                                 </select>
                             </div>
                             <div class="cleanup-actions">
-                                <button type="button" class="btn btn-danger" onclick="cleanupOldData()">
+                                <button type="button" class="btn btn-danger" id="cleanup-old-data-btn">
                                     <i class="fas fa-trash"></i> Clean Up Old Data
                                 </button>
                             </div>
@@ -345,10 +345,10 @@ Business City, BC 12345</textarea>
 
             <!-- Action Buttons -->
             <div class="settings-actions">
-                <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                <button type="button" class="btn btn-primary" id="save-settings-btn">
                     <i class="fas fa-save"></i> Save Changes
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="resetSettings()">
+                <button type="button" class="btn btn-secondary" id="reset-settings-btn">
                     <i class="fas fa-undo"></i> Reset to Default
                 </button>
             </div>

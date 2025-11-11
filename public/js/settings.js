@@ -131,6 +131,54 @@ class SettingsManager {
                 this.updateSetting(input);
             });
         });
+
+        // Button event listeners
+        this.setupButtonListeners();
+    }
+
+    setupButtonListeners() {
+        // Security buttons
+        const generateBackupCodesBtn = document.getElementById('generate-backup-codes-btn');
+        if (generateBackupCodesBtn) {
+            generateBackupCodesBtn.addEventListener('click', () => this.generateBackupCodes());
+        }
+
+        // Data management buttons
+        const createBackupBtn = document.getElementById('create-backup-btn');
+        if (createBackupBtn) {
+            createBackupBtn.addEventListener('click', () => this.createBackup());
+        }
+
+        const restoreBackupBtn = document.getElementById('restore-backup-btn');
+        if (restoreBackupBtn) {
+            restoreBackupBtn.addEventListener('click', () => this.restoreBackup());
+        }
+
+        const exportDataBtn = document.getElementById('export-data-btn');
+        if (exportDataBtn) {
+            exportDataBtn.addEventListener('click', () => this.exportData());
+        }
+
+        const importDataBtn = document.getElementById('import-data-btn');
+        if (importDataBtn) {
+            importDataBtn.addEventListener('click', () => this.importData());
+        }
+
+        const cleanupOldDataBtn = document.getElementById('cleanup-old-data-btn');
+        if (cleanupOldDataBtn) {
+            cleanupOldDataBtn.addEventListener('click', () => this.cleanupOldData());
+        }
+
+        // Action buttons
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        if (saveSettingsBtn) {
+            saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+        }
+
+        const resetSettingsBtn = document.getElementById('reset-settings-btn');
+        if (resetSettingsBtn) {
+            resetSettingsBtn.addEventListener('click', () => this.resetSettings());
+        }
     }
 
     setupValidation() {
@@ -430,50 +478,7 @@ class SettingsManager {
 }
 
 // Global functions for button handlers
-function saveSettings() {
-    const settingsManager = window.settingsManager;
-    
-    // Validate password fields if they're being changed
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    if (currentPassword || newPassword || confirmPassword) {
-        if (!settingsManager.changePassword(currentPassword, newPassword, confirmPassword)) {
-            return;
-        }
-    }
-    
-    settingsManager.saveSettings();
-}
 
-function resetSettings() {
-    window.settingsManager.resetSettings();
-}
-
-function generateBackupCodes() {
-    window.settingsManager.generateBackupCodes();
-}
-
-function createBackup() {
-    window.settingsManager.createBackup();
-}
-
-function restoreBackup() {
-    window.settingsManager.restoreBackup();
-}
-
-function exportData() {
-    window.settingsManager.exportData();
-}
-
-function importData() {
-    window.settingsManager.importData();
-}
-
-function cleanupOldData() {
-    window.settingsManager.cleanupOldData();
-}
 
 function downloadBackupCodes(codes) {
     const content = `Two-Factor Authentication Backup Codes\nGenerated: ${new Date().toLocaleString()}\n\n${codes.join('\n')}`;

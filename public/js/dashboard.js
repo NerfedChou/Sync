@@ -10,8 +10,12 @@ class Dashboard {
         try {
             await this.loadKPIData();
             await this.loadRecentTransactions();
-            this.initCharts();
             this.setupEventListeners();
+            
+            // Small delay to ensure DOM is fully ready
+            setTimeout(() => {
+                this.initCharts();
+            }, 100);
         } catch (error) {
             console.error('Failed to initialize dashboard:', error);
             this.showToast('Failed to load dashboard data', 'error');
@@ -66,6 +70,28 @@ class Dashboard {
     }
 
     async initCharts() {
+        // Wait for Chart.js to be available
+        let attempts = 0;
+        while (typeof Chart === 'undefined' && attempts < 10) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js is not loaded after waiting');
+            this.showToast('Charts could not be loaded', 'error');
+            return;
+        }
+        
+        console.log('Chart.js is available, version:', Chart.version);
+        console.log('Initializing charts...');
+        
+        // Check if canvas elements exist
+        const revenueCanvas = document.getElementById('revenue-chart');
+        const expenseCanvas = document.getElementById('expense-chart');
+        console.log('Revenue canvas found:', !!revenueCanvas);
+        console.log('Expense canvas found:', !!expenseCanvas);
+        
         await this.initRevenueChart();
         await this.initExpenseChart();
     }
@@ -75,7 +101,18 @@ class Dashboard {
             const response = await fetch('/api/dashboard/revenue-trends?period=30');
             const data = await response.json();
             
-            const ctx = document.getElementById('revenue-chart').getContext('2d');
+            const canvas = document.getElementById('revenue-chart');
+            if (!canvas) {
+                console.error('Revenue chart canvas not found');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Could not get 2d context for revenue chart');
+                return;
+            }
+            
             this.revenueChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -112,6 +149,7 @@ class Dashboard {
             });
         } catch (error) {
             console.error('Failed to initialize revenue chart:', error);
+            this.showToast('Failed to load revenue chart', 'error');
         }
     }
 
@@ -120,7 +158,18 @@ class Dashboard {
             const response = await fetch('/api/dashboard/expense-breakdown');
             const data = await response.json();
             
-            const ctx = document.getElementById('expense-chart').getContext('2d');
+            const canvas = document.getElementById('expense-chart');
+            if (!canvas) {
+                console.error('Expense chart canvas not found');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Could not get 2d context for expense chart');
+                return;
+            }
+            
             this.expenseChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -150,6 +199,7 @@ class Dashboard {
             });
         } catch (error) {
             console.error('Failed to initialize expense chart:', error);
+            this.showToast('Failed to load expense chart', 'error');
         }
     }
 
@@ -159,6 +209,14 @@ class Dashboard {
         if (periodSelect) {
             periodSelect.addEventListener('change', () => {
                 this.updateRevenueChart();
+            });
+        }
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.refreshData();
             });
         }
     }
@@ -232,18 +290,7 @@ class Dashboard {
     }
 }
 
-// Global functions
-function refreshData() {
-    if (window.dashboard) {
-        window.dashboard.refreshData();
-    }
-}
 
-function updateRevenueChart() {
-    if (window.dashboard) {
-        window.dashboard.updateRevenueChart();
-    }
-}
 
 // Initialize dashboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

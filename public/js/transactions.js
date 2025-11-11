@@ -457,8 +457,8 @@ class TransactionsPage {
     setupModalListeners() {
         const modal = document.getElementById('transaction-modal');
         const overlay = document.getElementById('modal-overlay');
-        const closeBtn = document.getElementById('modal-close');
-        const cancelBtn = document.getElementById('cancel-btn');
+        const closeBtn = document.getElementById('close-transaction-modal-btn');
+        const cancelBtn = document.getElementById('cancel-transaction-btn');
         const form = document.getElementById('transaction-form');
 
         // Close modal events

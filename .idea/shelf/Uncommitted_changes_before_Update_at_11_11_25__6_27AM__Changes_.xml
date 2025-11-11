@@ -1,0 +1,96 @@
+<changelist name="Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]" date="1762813657077" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 11/11/25, 6:27 AM [Changes]" />
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/stack_line_reader.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/stack_line_reader.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/filesystem.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/filesystem.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_aarch64_linux_or_android.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_aarch64_linux_or_android.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/ssh2/lib/protocol/crypto/build/Release/sshcrypto.node" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/sshcrypto.node" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_x86_macos.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_x86_macos.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_arm_linux_or_android.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_arm_linux_or_android.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpufeatures.node" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/cpufeatures.node" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/tar-fs/test/fixtures/invalid.tar" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/invalid.tar" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/cpu_features.a" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/cpu_features.a" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/string_view.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/string_view.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_mips_linux_or_android.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_mips_linux_or_android.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/ssh2/lib/protocol/crypto/build/Release/obj.target/sshcrypto/src/binding.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/binding.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_aarch64_macos_or_iphone.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_aarch64_macos_or_iphone.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/ssh2/util/pagent.exe" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/pagent.exe" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/cpufeatures.node" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/cpufeatures1.node" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_x86_freebsd.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_x86_freebsd.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/ssh2/lib/protocol/crypto/build/Release/obj.target/sshcrypto.node" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/sshcrypto1.node" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_ppc_linux.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_ppc_linux.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/deps/cpu_features/cpu_features.a" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/cpu_features1.a" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpufeatures/src/binding.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/binding1.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_aarch64_windows.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_aarch64_windows.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_x86_windows.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_x86_windows.o" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="node_modules/cpu-features/build/Release/obj.target/cpu_features/deps/cpu_features/src/impl_x86_linux_or_android.o" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_11_11_25,_6_27 AM_[Changes]/impl_x86_linux_or_android.o" />
+  </binary>
+</changelist>

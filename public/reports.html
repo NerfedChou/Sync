@@ -46,7 +46,7 @@
                         <option value="quarterly">Quarterly</option>
                         <option value="yearly">Yearly</option>
                     </select>
-                    <button class="btn btn-secondary" onclick="exportReports()">
+                    <button class="btn btn-secondary" id="export-reports-btn">
                         <i class="fas fa-download"></i> Export
                     </button>
                 </div>
@@ -54,13 +54,13 @@
 
             <!-- Report Tabs -->
             <div class="report-tabs">
-                <button class="tab-btn active" onclick="switchTab('profit-loss')">
+                <button class="tab-btn active" data-tab="profit-loss">
                     <i class="fas fa-chart-line"></i> Profit & Loss
                 </button>
-                <button class="tab-btn" onclick="switchTab('balance-sheet')">
+                <button class="tab-btn" data-tab="balance-sheet">
                     <i class="fas fa-balance-scale"></i> Balance Sheet
                 </button>
-                <button class="tab-btn" onclick="switchTab('cash-flow')">
+                <button class="tab-btn" data-tab="cash-flow">
                     <i class="fas fa-water"></i> Cash Flow
                 </button>
             </div>
@@ -267,6 +267,7 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/reports.js"></script>
 </body>

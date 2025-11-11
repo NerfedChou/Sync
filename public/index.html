@@ -43,7 +43,7 @@
                     <p>Overview of your financial status</p>
                 </div>
                 <div class="header-actions">
-                    <button class="btn btn-primary" onclick="refreshData()">
+                    <button class="btn btn-primary" id="refresh-btn">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
@@ -97,13 +97,13 @@
                 <div class="table-container">
                     <div class="table-controls">
                         <h3>Revenue Trends</h3>
-                        <select id="revenue-period" onchange="updateRevenueChart()">
+                        <select id="revenue-period">
                             <option value="30">Last 30 Days</option>
                             <option value="60">Last 60 Days</option>
                             <option value="90">Last 90 Days</option>
                         </select>
                     </div>
-                    <div style="padding: 2rem;">
+                    <div class="chart-container" style="padding: 2rem;">
                         <canvas id="revenue-chart"></canvas>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                     <div class="table-controls">
                         <h3>Expense Breakdown</h3>
                     </div>
-                    <div style="padding: 2rem;">
+                    <div class="chart-container" style="padding: 2rem;">
                         <canvas id="expense-chart"></canvas>
                     </div>
                 </div>
@@ -149,6 +149,7 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

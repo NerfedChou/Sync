@@ -39,7 +39,7 @@
             <div class="content-header">
                 <h1>Accounts</h1>
                 <p>Manage your chart of accounts and balances</p>
-                <button class="btn btn-primary" onclick="openAddAccountModal()">
+                <button class="btn btn-primary" id="add-account-btn">
                     <i class="fas fa-plus"></i> Add Account
                 </button>
             </div>
@@ -129,7 +129,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">Add Account</h3>
-                <button class="close-btn" onclick="closeAccountModal()">&times;</button>
+                <button class="close-btn" id="close-account-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="account-form">
@@ -157,7 +157,7 @@
                         <textarea id="account-description" rows="3"></textarea>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeAccountModal()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-account-btn">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Account</button>
                     </div>
                 </form>
@@ -168,6 +168,7 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/accounts.js"></script>
 </body>

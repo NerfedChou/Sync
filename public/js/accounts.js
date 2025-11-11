@@ -296,8 +296,8 @@ class AccountsPage {
     setupModalListeners() {
         const modal = document.getElementById('account-modal');
         const overlay = document.getElementById('modal-overlay');
-        const closeBtn = document.getElementById('modal-close');
-        const cancelBtn = document.getElementById('cancel-btn');
+        const closeBtn = document.getElementById('close-account-modal-btn');
+        const cancelBtn = document.getElementById('cancel-account-btn');
         const form = document.getElementById('account-form');
 
         // Close modal events

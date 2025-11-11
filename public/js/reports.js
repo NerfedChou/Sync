@@ -58,6 +58,7 @@ class ReportsPage {
         const generateBtn = document.getElementById('generate-btn');
         const previewBtn = document.getElementById('preview-btn');
         const generateReportBtn = document.getElementById('generate-report-btn');
+        const exportBtn = document.getElementById('export-reports-btn');
 
         if (generateBtn) {
             generateBtn.addEventListener('click', () => this.generateReport());
@@ -71,6 +72,10 @@ class ReportsPage {
             generateReportBtn.addEventListener('click', () => this.generateReport());
         }
 
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportReports());
+        }
+
         // Report tabs
         this.setupTabListeners();
     }
@@ -79,20 +84,20 @@ class ReportsPage {
      * Setup tab listeners
      */
     setupTabListeners() {
-        const tabs = document.querySelectorAll('.report-tab');
-        const contents = document.querySelectorAll('.report-content');
+        const tabs = document.querySelectorAll('.tab-btn');
+        const contents = document.querySelectorAll('.report-tab');
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
                 
                 // Update active tab
-                tabs.forEach(t => t.classList.remove('report-tab--active'));
-                tab.classList.add('report-tab--active');
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
 
                 // Update active content
-                contents.forEach(content => content.classList.remove('report-content--active'));
-                document.getElementById(`${targetTab}-content`).classList.add('report-content--active');
+                contents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
             });
         });
     }
