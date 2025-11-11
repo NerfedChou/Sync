@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Accounting System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-chart-line"></i>
+                <span>Accounting System</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="accounts.html" class="nav-link">
+                    <i class="fas fa-wallet"></i> Accounts
+                </a>
+                <a href="transactions.html" class="nav-link">
+                    <i class="fas fa-exchange-alt"></i> Transactions
+                </a>
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i> Reports
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Overview of your financial status</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Revenue</h3>
+                        <p class="stat-value" id="total-revenue">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Expenses</h3>
+                        <p class="stat-value" id="total-expenses">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Net Profit</h3>
+                        <p class="stat-value" id="net-profit">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Cash Balance</h3>
+                        <p class="stat-value" id="cash-balance">$0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="stats-grid">
+                <div class="table-container">
+                    <div class="table-controls">
+                        <h3>Revenue Trends</h3>
+                        <select id="revenue-period" onchange="updateRevenueChart()">
+                            <option value="30">Last 30 Days</option>
+                            <option value="60">Last 60 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-controls">
+                        <h3>Expense Breakdown</h3>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <canvas id="expense-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="table-container">
+                <div class="table-controls">
+                    <h3>Recent Transactions</h3>
+                    <a href="transactions.html" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> View All
+                    </a>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-transactions">
+                            <!-- Transactions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

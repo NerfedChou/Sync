@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Accounting System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-chart-line"></i>
+                <span>Accounting System</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="accounts.html" class="nav-link">
+                    <i class="fas fa-wallet"></i> Accounts
+                </a>
+                <a href="transactions.html" class="nav-link active">
+                    <i class="fas fa-exchange-alt"></i> Transactions
+                </a>
+                <a href="reports.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i> Reports
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Transactions</h1>
+                <p>Record and manage all financial transactions</p>
+                <button class="btn btn-primary" onclick="openAddTransactionModal()">
+                    <i class="fas fa-plus"></i> Add Transaction
+                </button>
+            </div>
+
+            <!-- Transaction Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Income</h3>
+                        <p class="stat-value" id="total-income">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Expenses</h3>
+                        <p class="stat-value" id="total-expenses">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Net Balance</h3>
+                        <p class="stat-value" id="net-balance">$0.00</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Transactions</h3>
+                        <p class="stat-value" id="total-transactions">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="table-container">
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="transaction-search" placeholder="Search transactions...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="transaction-type-filter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                        <select id="transaction-status-filter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <input type="date" id="date-filter" class="filter-select">
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Account</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbody">
+                            <!-- Transactions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="btn btn-secondary" id="prev-page" onclick="changePage(-1)">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button class="btn btn-secondary" id="next-page" onclick="changePage(1)">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Transaction Modal -->
+    <div id="transaction-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Transaction</h3>
+                <button class="close-btn" onclick="closeTransactionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="transaction-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transaction-date">Date</label>
+                            <input type="date" id="transaction-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transaction-type">Type</label>
+                            <select id="transaction-type" required>
+                                <option value="">Select Type</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-description">Description</label>
+                        <input type="text" id="transaction-description" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transaction-category">Category</label>
+                            <select id="transaction-category" required>
+                                <option value="">Select Category</option>
+                                <option value="Revenue">Revenue</option>
+                                <option value="Salaries">Salaries</option>
+                                <option value="Rent">Rent</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Supplies">Supplies</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transaction-account">Account</label>
+                            <select id="transaction-account" required>
+                                <option value="">Select Account</option>
+                                <!-- Accounts will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-amount">Amount</label>
+                        <input type="number" id="transaction-amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-status">Status</label>
+                        <select id="transaction-status" required>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeTransactionModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/transactions.js"></script>
+</body>
+</html>
