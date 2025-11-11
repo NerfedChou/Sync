@@ -116,21 +116,30 @@ class ApiService {
         // Add company context if available
         const companyId = window.app?.getCurrentCompanyId();
         
-        // Convert period to days for backend
-        const periodMap = {
-            'today': 1,
-            'week': 7,
-            'month': 30,
-            'quarter': 90,
-            'year': 365
-        };
+        // Handle both string period and object with period property
+        let days;
+        if (typeof period === 'object' && period.period) {
+            days = period.period;
+        } else {
+            // Convert period to days for backend
+            const periodMap = {
+                'today': 1,
+                'week': 7,
+                'month': 30,
+                'quarter': 90,
+                'year': 365
+            };
+            
+            days = !isNaN(period) ? parseInt(period) : (periodMap[period] || 30);
+        }
         
-        const days = !isNaN(period) ? parseInt(period) : (periodMap[period] || 30);
         const params = { period: days };
         
         if (companyId) {
             params.company_id = companyId;
         }
+        
+        console.log('Making API call to /dashboard/revenue-trends with params:', params);
         return this.get('/dashboard/revenue-trends', params);
     }
 
@@ -175,7 +184,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/profit-loss', params);
+        return this.get('/dashboard/profit-loss', params);
     }
 
     // Companies endpoints

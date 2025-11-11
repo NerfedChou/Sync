@@ -46,14 +46,14 @@ CREATE TABLE IF NOT EXISTS transactions_simple (
 
 -- Insert some sample data into the new simplified transactions table
 INSERT INTO transactions_simple (name, date, description, category, account, amount, status, company_id) VALUES
-('Office Rent Payment', '2025-01-01', 'Monthly office rent for January', 'Operating Expenses', 'Rent Expense', 2500.00, 'completed', 1),
-('Software License', '2025-01-05', 'Annual software license renewal', 'Software Expenses', 'Software Expense', 1200.00, 'completed', 1),
-('Client Payment', '2025-01-10', 'Payment from ABC Corp for consulting services', 'Service Revenue', 'Accounts Receivable', 8500.00, 'completed', 1),
-('Office Supplies', '2025-01-15', 'Purchase of office supplies and stationery', 'Office Expenses', 'Office Supplies Expense', 350.00, 'pending', 1),
-('Utilities Payment', '2025-01-20', 'Electricity and water bills for January', 'Utilities', 'Utilities Expense', 680.00, 'completed', 1),
-('Salary Payment', '2025-01-25', 'Monthly salary for staff', 'Payroll', 'Salaries Expense', 12500.00, 'pending', 1),
-('Equipment Purchase', '2025-01-28', 'New laptop for development team', 'Capital Expenses', 'Equipment Asset', 2200.00, 'pending', 1),
-('Consulting Revenue', '2025-01-30', 'Revenue from XYZ Corp consulting project', 'Service Revenue', 'Service Revenue', 15000.00, 'completed', 1);
+('Office Rent Payment', '2025-01-01', 'Monthly office rent for January', 'Operating Expenses', 'Rent Expense', 125000.00, 'completed', 1),
+('Software License', '2025-01-05', 'Annual software license renewal', 'Software Expenses', 'Software Expense', 60000.00, 'completed', 1),
+('Client Payment', '2025-01-10', 'Payment from ABC Corp for consulting services', 'Service Revenue', 'Accounts Receivable', 425000.00, 'completed', 1),
+('Office Supplies', '2025-01-15', 'Purchase of office supplies and stationery', 'Office Expenses', 'Office Supplies Expense', 17500.00, 'pending', 1),
+('Utilities Payment', '2025-01-20', 'Electricity and water bills for January', 'Utilities', 'Utilities Expense', 34000.00, 'completed', 1),
+('Salary Payment', '2025-01-25', 'Monthly salary for staff', 'Payroll', 'Salaries Expense', 625000.00, 'pending', 1),
+('Equipment Purchase', '2025-01-28', 'New laptop for development team', 'Capital Expenses', 'Equipment Asset', 110000.00, 'pending', 1),
+('Consulting Revenue', '2025-01-30', 'Revenue from XYZ Corp consulting project', 'Service Revenue', 'Service Revenue', 750000.00, 'completed', 1);
 
 -- Create views for simplified access
 CREATE OR REPLACE VIEW companies_simple AS

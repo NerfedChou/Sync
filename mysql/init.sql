@@ -177,7 +177,7 @@ INSERT INTO admin (name) VALUES ('Admin');
 
 -- Insert sample company
 INSERT INTO companies (company_name, tax_id, address, phone, email, website, currency_code, fiscal_year_start) VALUES
-('Demo Company Inc.', '12-3456789', '123 Business St, Suite 100, New York, NY 10001', '+1-555-0123', 'info@democompany.com', 'https://democompany.com', 'USD', '2024-01-01');
+('Demo Company Inc.', '12-3456789', '123 Business St, Suite 100, Manila, Metro Manila 1000', '+63-2-555-0123', 'info@democompany.com', 'https://democompany.com', 'PHP', '2024-01-01');
 
 -- Insert sample accounting periods
 INSERT INTO accounting_periods (company_id, period_name, start_date, end_date) VALUES

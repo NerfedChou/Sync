@@ -776,8 +776,7 @@ canvas {
 }
 
 .full-width-chart {
-  height: 500px;
-  padding: 2rem;
+  padding: 0.5rem;
 }
 
 /* Enhanced chart containers */

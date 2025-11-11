@@ -307,16 +307,16 @@ class ReportsPage {
                         display: false
                     }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
                             }
                         }
                     }
-                }
             }
         });
     }
@@ -391,16 +391,16 @@ class ReportsPage {
                         display: false
                     }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
                             }
                         }
                     }
-                }
             }
         });
     }
@@ -564,9 +564,9 @@ class ReportsPage {
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-PH', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'PHP'
         }).format(value);
     }
 

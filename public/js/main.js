@@ -568,9 +568,9 @@ class App {
 // Global utility functions
 window.utils = {
     formatCurrency: (value) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-PH', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'PHP'
         }).format(value);
     },
     

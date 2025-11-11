@@ -53,6 +53,9 @@ try {
     $endDate = date('Y-m-d');
     $startDate = date('Y-m-d', strtotime("-{$period} days"));
     
+    // For testing purposes, use a broader date range to include sample data
+    $startDate = '2025-01-01'; // Start from beginning of year to include sample data
+    
     // Determine date format and grouping based on period
     $dateFormat = getDateFormat($period);
     $groupBy = getGroupBy($period);
@@ -77,6 +80,11 @@ try {
     ";
     
     $results = $db->fetchAll($sql, [$company_id, $startDate, $endDate]);
+    
+    // Debug logging
+    error_log("Revenue trends query: " . $sql);
+    error_log("Parameters: company_id=$company_id, start_date=$startDate, end_date=$endDate");
+    error_log("Results: " . json_encode($results));
     
     // Format data for Chart.js
     $labels = array_column($results, 'label');

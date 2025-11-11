@@ -126,7 +126,7 @@ class TransactionsPage {
                 <span class="transaction-category">${transaction.Category}</span>
             </td>
             <td class="${amountClass} font-medium transaction-amount">
-                ${amountPrefix}$${Math.abs(transaction.Amount).toLocaleString()}
+                ${amountPrefix}₱${Math.abs(transaction.Amount).toLocaleString()}
             </td>
             <td>
                 <span class="status-badge ${statusClass}">
@@ -692,9 +692,9 @@ class TransactionsPage {
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-PH', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'PHP'
         }).format(value);
     }
 

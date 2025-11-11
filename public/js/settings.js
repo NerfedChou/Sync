@@ -48,7 +48,7 @@ class SettingsManager {
                 companyEmail: 'contact@mybusiness.com',
                 companyPhone: '+1 234 567 8900',
                 companyAddress: '123 Business St\nSuite 100\nBusiness City, BC 12345',
-                defaultCurrency: 'USD',
+                defaultCurrency: 'PHP',
                 fiscalYearStart: '2024-01-01',
                 timezone: 'America/New_York'
             },

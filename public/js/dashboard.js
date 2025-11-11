@@ -263,6 +263,9 @@ class Dashboard {
                     }
                 }
             });
+            
+            console.log('Area chart created successfully with fill:', true);
+             
         } catch (error) {
             console.error('Failed to initialize expense chart:', error);
             this.showError('Failed to load expense chart');
@@ -351,7 +354,7 @@ class Dashboard {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return '₱' + value.toLocaleString();
                                 }
                             }
                         }
@@ -359,10 +362,11 @@ class Dashboard {
                 }
             });
             
+            console.log('Area chart created successfully with fill:', true);
 
         } catch (error) {
-            console.error('Failed to initialize profit & loss chart:', error);
-            this.showError('Failed to load profit & loss chart');
+            console.error('Failed to initialize trend chart:', error);
+            this.showError('Failed to load trend chart');
         }
     }
 
@@ -386,6 +390,13 @@ class Dashboard {
             return;
         }
         
+        // Ensure canvas has proper dimensions
+        const container = canvas.parentElement;
+        if (container) {
+            canvas.style.width = '100%';
+            canvas.style.height = '400px';
+        }
+        
         const ctx = canvas.getContext('2d');
         if (!ctx) {
             console.error('Could not get 2d context for trend chart');
@@ -394,9 +405,32 @@ class Dashboard {
         
         try {
             const period = this.convertPeriodToDays(document.getElementById('revenue-period').value);
-            const response = await apiService.getRevenueTrends({ period: period });
-            const data = response.success ? response.data : response;
+            console.log('Fetching revenue trends with period:', period);
             
+            const response = await apiService.getRevenueTrends({ period: period });
+            console.log('Raw API response:', response);
+            
+            const data = response.success ? response.data : response;
+            console.log('Processed data:', data);
+            
+            console.log('Creating area chart with:', {
+                labels: data.labels,
+                dataPoints: data.data,
+                labelsLength: data.labels?.length,
+                dataLength: data.data?.length,
+                fillEnabled: true,
+                chartType: 'line with fill'
+            });
+            
+            // Validate data before creating chart
+            if (!data.labels || !data.data || data.labels.length === 0 || data.data.length === 0) {
+                console.warn('No data available for trend chart, showing empty chart');
+                // Create empty chart with placeholder data
+                data.labels = ['No Data'];
+                data.data = [0];
+            }
+            
+            // Enhanced area chart for better visual impact
             this.trendChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -405,7 +439,7 @@ class Dashboard {
                         label: 'Revenue',
                         data: data.data || [],
                         borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
@@ -442,9 +476,9 @@ class Dashboard {
                             displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Revenue: ' + new Intl.NumberFormat('en-US', {
+                                    return 'Revenue: ' + new Intl.NumberFormat('en-PH', {
                                         style: 'currency',
-                                        currency: 'USD'
+                                        currency: 'PHP'
                                     }).format(context.parsed.y);
                                 }
                             }
@@ -458,7 +492,7 @@ class Dashboard {
                             },
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return '₱' + value.toLocaleString();
                                 },
                                 font: {
                                     size: 12
@@ -483,6 +517,7 @@ class Dashboard {
                 }
             });
             
+            console.log('Area chart created successfully with fill:', true);
 
         } catch (error) {
             console.error('Failed to initialize trend chart:', error);
@@ -596,21 +631,6 @@ class Dashboard {
         }
     }
 
-    async updateExpenseChart() {
-        try {
-            const period = document.getElementById('revenue-period').value;
-            const response = await apiService.getExpenseBreakdown(period);
-            const data = response.success ? response.data : response;
-            
-            this.expenseChart.data.labels = data.labels || [];
-            this.expenseChart.data.datasets[0].data = data.data || [];
-            this.expenseChart.update();
-        } catch (error) {
-            console.error('Failed to update expense chart:', error);
-            this.showError('Failed to update expense chart');
-        }
-    }
-
     async updateProfitLossChart() {
         try {
             const period = this.convertPeriodToDays(document.getElementById('revenue-period').value);
@@ -646,9 +666,9 @@ class Dashboard {
     }
 
     formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-PH', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'PHP'
         }).format(amount);
     }
 
