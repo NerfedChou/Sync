@@ -4,19 +4,10 @@
 ```mermaid
 erDiagram
     %% Core Entities
-    users {
-        bigint user_id PK
-        varchar username UK
-        varchar email UK
-        varchar password_hash
-        varchar first_name
-        varchar last_name
-        boolean is_active
-        timestamp last_login
-        varchar totp_secret
-        boolean is_2fa_enabled
+    admin {
+        int id PK
+        varchar name
         timestamp created_at
-        timestamp updated_at
     }
 
     companies {
@@ -135,7 +126,7 @@ erDiagram
     }
 
     %% Relationships
-    users ||--o{ admin_settings : "configures"
+    admin ||--o{ admin_settings : "configures"
     
     companies ||--o{ accounting_periods : "contains"
     companies ||--o{ accounts : "owns"
@@ -154,7 +145,7 @@ erDiagram
     
     %% Indexes and Constraints
     %% Unique Constraints
-    %% users.username, users.email, admin_settings.setting_key
+    %% admin_settings.setting_key
     %% companies.company_name, accounting_periods.(company_id,start_date,end_date)
     %% accounts.(company_id,account_code), transactions.(company_id,transaction_number)
     %% budgets.(company_id,account_id,period_id)
@@ -176,9 +167,9 @@ erDiagram
 ## Architecture Summary
 
 ### **Single Admin Design**
-- **One User Record**: Single administrator with full system access
+- **One Admin Record**: Single administrator with full system access
+- **No Authentication**: Simple admin table without complex authentication
 - **No Role Management**: Eliminated complex role-based permissions
-- **2FA Support**: Added `totp_secret` and `is_2fa_enabled` for security
 - **Admin Settings**: Centralized configuration via `admin_settings` table
 
 ### **Multi-Company Support**
@@ -197,7 +188,7 @@ erDiagram
 1. **Complexity Reduction**: From 8 complex tables to 8 simplified tables
 2. **Maintenance Ease**: No user management, role permissions, or tenant isolation
 3. **Performance**: Fewer JOINs and simpler queries
-4. **Security**: Single admin with 2FA instead of multiple attack vectors
+4. **Security**: Simple single admin without authentication complexity
 5. **Scalability**: Easy to add companies without user complexity
 
 ### **Data Flow**
@@ -207,4 +198,4 @@ Admin Login → Select Company → Manage Accounting Data
 Single User → Company Context → Standard Accounting Operations
 ```
 
-This architecture provides the flexibility of managing multiple businesses while keeping the system simple, secure, and maintainable.
+This architecture provides the flexibility of managing multiple businesses while keeping the system simple, and maintainable.

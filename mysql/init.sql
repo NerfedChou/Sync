@@ -11,9 +11,16 @@ COLLATE utf8mb4_unicode_ci;
 
 USE accounting_system;
 
--- Companies table for multi-tenant support
+-- Single admin user table (no auth, no password)
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Companies table for multi-company support
 CREATE TABLE companies (
-    company_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
     tax_id VARCHAR(50) NULL,
     address TEXT NULL,
@@ -30,45 +37,19 @@ CREATE TABLE companies (
     INDEX idx_is_active (is_active)
 ) ENGINE=InnoDB;
 
--- Users table for authentication and authorization
-CREATE TABLE users (
-    user_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    role ENUM('admin', 'accountant', 'viewer') DEFAULT 'viewer',
-    is_active BOOLEAN DEFAULT TRUE,
-    last_login TIMESTAMP NULL,
-    email_verified_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    INDEX idx_company_id (company_id),
-    INDEX idx_username (username),
-    INDEX idx_email (email),
-    INDEX idx_role (role),
-    INDEX idx_is_active (is_active)
-) ENGINE=InnoDB;
-
 -- Accounting periods for fiscal management
 CREATE TABLE accounting_periods (
-    period_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
+    period_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
     period_name VARCHAR(100) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     is_closed BOOLEAN DEFAULT FALSE,
     closed_at TIMESTAMP NULL,
-    closed_by BIGINT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    FOREIGN KEY (closed_by) REFERENCES users(user_id) ON DELETE SET NULL,
     UNIQUE KEY unique_company_period (company_id, start_date, end_date),
     INDEX idx_company_id (company_id),
     INDEX idx_dates (start_date, end_date),
@@ -77,12 +58,12 @@ CREATE TABLE accounting_periods (
 
 -- Chart of Accounts
 CREATE TABLE accounts (
-    account_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
+    account_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
     account_code VARCHAR(20) NOT NULL,
     account_name VARCHAR(255) NOT NULL,
     account_type ENUM('ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE') NOT NULL,
-    parent_account_id BIGINT UNSIGNED NULL,
+    parent_account_id INT NULL,
     opening_balance DECIMAL(15,2) DEFAULT 0.00,
     current_balance DECIMAL(15,2) DEFAULT 0.00,
     is_active BOOLEAN DEFAULT TRUE,
@@ -103,9 +84,9 @@ CREATE TABLE accounts (
 
 -- Transactions (Journal Entries)
 CREATE TABLE transactions (
-    transaction_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
-    period_id BIGINT UNSIGNED NOT NULL,
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    period_id INT NOT NULL,
     transaction_number VARCHAR(50) NOT NULL,
     transaction_date DATE NOT NULL,
     description TEXT NOT NULL,
@@ -113,9 +94,7 @@ CREATE TABLE transactions (
     total_amount DECIMAL(15,2) NOT NULL,
     status ENUM('draft', 'posted', 'void') DEFAULT 'draft',
     posted_at TIMESTAMP NULL,
-    posted_by BIGINT UNSIGNED NULL,
     voided_at TIMESTAMP NULL,
-    voided_by BIGINT UNSIGNED NULL,
     void_reason TEXT NULL,
     attachment_path VARCHAR(500) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -123,8 +102,6 @@ CREATE TABLE transactions (
     
     FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
     FOREIGN KEY (period_id) REFERENCES accounting_periods(period_id) ON DELETE RESTRICT,
-    FOREIGN KEY (posted_by) REFERENCES users(user_id) ON DELETE SET NULL,
-    FOREIGN KEY (voided_by) REFERENCES users(user_id) ON DELETE SET NULL,
     UNIQUE KEY unique_company_transaction (company_id, transaction_number),
     INDEX idx_company_id (company_id),
     INDEX idx_period_id (period_id),
@@ -135,20 +112,18 @@ CREATE TABLE transactions (
 
 -- Transaction Lines (Double-entry bookkeeping)
 CREATE TABLE transaction_lines (
-    line_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    transaction_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL,
+    line_id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_id INT NOT NULL,
+    account_id INT NOT NULL,
     description TEXT NULL,
     debit_amount DECIMAL(15,2) DEFAULT 0.00,
     credit_amount DECIMAL(15,2) DEFAULT 0.00,
     reconciled BOOLEAN DEFAULT FALSE,
     reconciled_at TIMESTAMP NULL,
-    reconciled_by BIGINT UNSIGNED NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE RESTRICT,
-    FOREIGN KEY (reconciled_by) REFERENCES users(user_id) ON DELETE SET NULL,
     INDEX idx_transaction_id (transaction_id),
     INDEX idx_account_id (account_id),
     INDEX idx_debit_amount (debit_amount),
@@ -158,10 +133,10 @@ CREATE TABLE transaction_lines (
 
 -- Budgets for budgeting and variance analysis
 CREATE TABLE budgets (
-    budget_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
-    account_id BIGINT UNSIGNED NOT NULL,
-    period_id BIGINT UNSIGNED NOT NULL,
+    budget_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    account_id INT NOT NULL,
+    period_id INT NOT NULL,
     budgeted_amount DECIMAL(15,2) NOT NULL,
     actual_amount DECIMAL(15,2) DEFAULT 0.00,
     variance DECIMAL(15,2) GENERATED ALWAYS AS (actual_amount - budgeted_amount) STORED,
@@ -184,28 +159,21 @@ CREATE TABLE budgets (
     INDEX idx_period_id (period_id)
 ) ENGINE=InnoDB;
 
--- Audit trail for tracking changes
-CREATE TABLE audit_log (
-    audit_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    company_id BIGINT UNSIGNED NOT NULL,
-    user_id BIGINT UNSIGNED NULL,
-    table_name VARCHAR(100) NOT NULL,
-    record_id BIGINT UNSIGNED NOT NULL,
-    action ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
-    old_values JSON NULL,
-    new_values JSON NULL,
-    ip_address VARCHAR(45) NULL,
-    user_agent TEXT NULL,
+-- Admin settings table
+CREATE TABLE admin_settings (
+    setting_id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL UNIQUE,
+    setting_value TEXT NULL,
+    setting_type ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string',
+    description TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
-    INDEX idx_company_id (company_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_table_record (table_name, record_id),
-    INDEX idx_action (action),
-    INDEX idx_created_at (created_at)
+    INDEX idx_setting_key (setting_key)
 ) ENGINE=InnoDB;
+
+-- Insert sample admin
+INSERT INTO admin (name) VALUES ('Admin');
 
 -- Insert sample company
 INSERT INTO companies (company_name, tax_id, address, phone, email, website, currency_code, fiscal_year_start) VALUES
@@ -297,10 +265,6 @@ UPDATE accounts SET parent_account_id = (SELECT account_id FROM (SELECT account_
 UPDATE accounts SET parent_account_id = (SELECT account_id FROM (SELECT account_id FROM accounts WHERE account_code = '5100' AND company_id = 1) AS temp) WHERE account_code IN ('5110', '5120') AND company_id = 1;
 UPDATE accounts SET parent_account_id = (SELECT account_id FROM (SELECT account_id FROM accounts WHERE account_code = '5200' AND company_id = 1) AS temp) WHERE account_code IN ('5210', '5220', '5230', '5240', '5250') AND company_id = 1;
 UPDATE accounts SET parent_account_id = (SELECT account_id FROM (SELECT account_id FROM accounts WHERE account_code = '5300' AND company_id = 1) AS temp) WHERE account_code IN ('5310', '5320') AND company_id = 1;
-
--- Insert sample admin user (password: admin123)
-INSERT INTO users (company_id, username, email, password_hash, first_name, last_name, role) VALUES
-(1, 'admin', 'admin@democompany.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin', 'User', 'admin');
 
 -- Insert sample budgets for Q1 2024
 INSERT INTO budgets (company_id, account_id, period_id, budgeted_amount, notes) VALUES

@@ -84,7 +84,8 @@ class App {
     async initCompanyContext() {
         try {
             // Load companies for the selector
-            this.companies = await apiService.getCompanies();
+            const response = await apiService.getCompanies();
+            this.companies = response.success ? response.data : response;
             this.setupCompanySelector();
             this.updateCompanyDisplay();
         } catch (error) {
@@ -107,7 +108,7 @@ class App {
         this.companies.forEach(company => {
             if (company.is_active) {
                 const option = document.createElement('option');
-                option.value = company.company_id;
+                option.value = company.id; // API returns 'id' not 'company_id'
                 option.textContent = company.company_name;
                 selector.appendChild(option);
             }
@@ -136,7 +137,7 @@ class App {
             return;
         }
 
-        const company = this.companies.find(c => c.company_id == companyId);
+        const company = this.companies.find(c => c.id == companyId);
         if (!company) return;
 
         this.selectedCompanyId = companyId;

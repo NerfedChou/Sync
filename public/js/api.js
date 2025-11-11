@@ -112,24 +112,70 @@ class ApiService {
         return this.get('/dashboard/kpi', params);
     }
 
-    async getRevenueTrends(period = 30) {
+    async getRevenueTrends(period = 'month') {
         // Add company context if available
         const companyId = window.app?.getCurrentCompanyId();
-        const params = { period };
+        
+        // Convert period to days for backend
+        const periodMap = {
+            'today': 1,
+            'week': 7,
+            'month': 30,
+            'quarter': 90,
+            'year': 365
+        };
+        
+        const days = !isNaN(period) ? parseInt(period) : (periodMap[period] || 30);
+        const params = { period: days };
+        
         if (companyId) {
             params.company_id = companyId;
         }
         return this.get('/dashboard/revenue-trends', params);
     }
 
-    async getExpenseBreakdown() {
+    async getExpenseBreakdown(period = 'month') {
         // Add company context if available
         const companyId = window.app?.getCurrentCompanyId();
-        const params = {};
+        
+        // Convert period to days for backend
+        const periodMap = {
+            'today': 1,
+            'week': 7,
+            'month': 30,
+            'quarter': 90,
+            'year': 365
+        };
+        
+        const days = !isNaN(period) ? parseInt(period) : (periodMap[period] || 30);
+        const params = { period: days };
+        
         if (companyId) {
             params.company_id = companyId;
         }
         return this.get('/dashboard/expense-breakdown', params);
+    }
+
+    async getProfitLoss(period = 'month') {
+        // Add company context if available
+        const companyId = window.app?.getCurrentCompanyId();
+        
+        // Convert period to days for backend
+        const periodMap = {
+            'today': 1,
+            'week': 7,
+            'month': 30,
+            'quarter': 90,
+            'year': 365
+        };
+        
+        const days = !isNaN(period) ? parseInt(period) : (periodMap[period] || 30);
+        const params = { period: days };
+        
+        if (companyId) {
+            params.company_id = companyId;
+        }
+        return this.get('/profit-loss', params);
     }
 
     // Companies endpoints
@@ -160,7 +206,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/accounts', params);
+        return this.get('/accounts/simple', params);
     }
 
     async getAccount(id) {
@@ -191,7 +237,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/transactions', params);
+        return this.get('/transactions/simple', params);
     }
 
     async getTransaction(id) {
@@ -222,7 +268,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/transactions/recent', params);
+        return this.get('/transactions/simple', params);
     }
 
     // Reports endpoints
@@ -232,7 +278,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/reports/profit-loss', params);
+        return this.get('/profit-loss', params);
     }
 
     async getBalanceSheet(params = {}) {

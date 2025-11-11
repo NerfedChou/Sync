@@ -30,7 +30,8 @@ class AccountsPage {
      */
     async loadAccounts() {
         try {
-            this.accounts = await apiService.getAccounts();
+            const response = await apiService.getAccounts();
+            this.accounts = response.success ? response.data : response;
             this.filteredAccounts = [...this.accounts];
             this.displayAccounts();
         } catch (error) {
@@ -73,23 +74,23 @@ class AccountsPage {
     createAccountRow(account) {
         const row = document.createElement('tr');
         
-        const typeClass = this.getAccountTypeClass(account.type);
-        const statusClass = account.status === 'active' ? 'status-badge--active' : 'status-badge--inactive';
-        const balanceClass = account.balance >= 0 ? 'text-green-600' : 'text-red-600';
+        const typeClass = this.getAccountTypeClass(account.Type);
+        const statusClass = account.Status === 'active' ? 'status-badge--active' : 'status-badge--inactive';
+        const balanceClass = account.Balance >= 0 ? 'text-green-600' : 'text-red-600';
         
         row.innerHTML = `
             <td class="account-name">
-                <strong>${account.name}</strong>
+                <strong>${account['Account Name']}</strong>
             </td>
             <td>
-                <span class="account-type ${typeClass}">${this.formatAccountType(account.type)}</span>
+                <span class="account-type ${typeClass}">${this.formatAccountType(account.Type)}</span>
             </td>
             <td class="${balanceClass} font-medium account-balance">
-                ${this.formatCurrency(account.balance)}
+                ${this.formatCurrency(account.Balance)}
             </td>
             <td>
                 <span class="status-badge ${statusClass}">
-                    ${account.status}
+                    ${account.Status}
                 </span>
             </td>
             <td class="account-actions">
@@ -151,15 +152,18 @@ class AccountsPage {
         let totalEquity = 0;
 
         this.accounts.forEach(account => {
-            switch (account.type) {
+            const type = account.Type;
+            const balance = account.Balance;
+            
+            switch (type.toLowerCase()) {
                 case 'asset':
-                    totalAssets += account.balance;
+                    totalAssets += balance;
                     break;
                 case 'liability':
-                    totalLiabilities += account.balance;
+                    totalLiabilities += balance;
                     break;
                 case 'equity':
-                    totalEquity += account.balance;
+                    totalEquity += balance;
                     break;
             }
         });
@@ -249,10 +253,10 @@ class AccountsPage {
             title.textContent = 'Edit Account';
             this.currentEditId = account.id;
             
-            document.getElementById('account-name').value = account.name;
-            document.getElementById('account-type').value = account.type;
-            document.getElementById('account-balance').value = Math.abs(account.balance);
-            document.getElementById('account-description').value = account.description || '';
+            document.getElementById('account-name').value = account['Account Name'];
+            document.getElementById('account-type').value = account.Type;
+            document.getElementById('account-balance').value = Math.abs(account.Balance);
+            document.getElementById('account-description').value = '';
         } else {
             // Add mode
             title.textContent = 'Add New Account';
@@ -356,9 +360,7 @@ class AccountsPage {
         const term = searchTerm.toLowerCase();
         
         this.filteredAccounts = this.accounts.filter(account => 
-            account.name.toLowerCase().includes(term) ||
-            account.code.toLowerCase().includes(term) ||
-            (account.description && account.description.toLowerCase().includes(term))
+            account['Account Name'].toLowerCase().includes(term)
         );
         
         this.displayAccounts();
@@ -371,7 +373,7 @@ class AccountsPage {
         if (!type) {
             this.filteredAccounts = [...this.accounts];
         } else {
-            this.filteredAccounts = this.accounts.filter(account => account.type === type);
+            this.filteredAccounts = this.accounts.filter(account => account.Type === type);
         }
         
         this.displayAccounts();

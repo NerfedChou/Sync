@@ -51,7 +51,8 @@ class TransactionsPage {
      * Load transactions from API
      */
     async loadTransactions() {
-        this.transactions = await apiService.getTransactions();
+        const response = await apiService.getTransactions();
+        this.transactions = response.success ? response.data : response;
         this.filteredTransactions = [...this.transactions];
         return this.transactions;
     }
@@ -60,7 +61,8 @@ class TransactionsPage {
      * Load accounts from API
      */
     async loadAccounts() {
-        this.accounts = await apiService.getAccounts();
+        const response = await apiService.getAccounts();
+        this.accounts = response.success ? response.data : response;
         return this.accounts;
     }
 
@@ -105,30 +107,30 @@ class TransactionsPage {
     createTransactionRow(transaction) {
         const row = document.createElement('tr');
         
-        // Handle both credit/debit and positive/negative amounts
-        const isCredit = transaction.type === 'credit' || transaction.amount > 0;
+        // Handle positive/negative amounts
+        const isCredit = transaction.Amount > 0;
         const amountClass = isCredit ? 'text-green-600' : 'text-red-600';
         const amountPrefix = isCredit ? '+' : '-';
-        const statusClass = transaction.status === 'completed' ? 'status-badge--active' : 'status-badge--pending';
+        const statusClass = transaction.Status === 'completed' ? 'status-badge--active' : 'status-badge--pending';
         
         row.innerHTML = `
             <td>
                 <input type="checkbox" class="checkbox transaction-checkbox" data-id="${transaction.id}">
             </td>
-            <td>${this.formatDate(transaction.date)}</td>
+            <td>${this.formatDate(transaction.Date)}</td>
             <td class="transaction-description">
-                <strong>${transaction.description}</strong>
+                <strong>${transaction.Description}</strong>
             </td>
-            <td>${transaction.account}</td>
+            <td>${transaction.Account}</td>
             <td>
-                <span class="transaction-category">${transaction.category}</span>
+                <span class="transaction-category">${transaction.Category}</span>
             </td>
             <td class="${amountClass} font-medium transaction-amount">
-                ${amountPrefix}$${Math.abs(transaction.amount).toLocaleString()}
+                ${amountPrefix}$${Math.abs(transaction.Amount).toLocaleString()}
             </td>
             <td>
                 <span class="status-badge ${statusClass}">
-                    ${transaction.status}
+                    ${transaction.Status}
                 </span>
             </td>
             <td class="transaction-actions">
@@ -177,7 +179,7 @@ class TransactionsPage {
             this.accounts.forEach(account => {
                 const option = document.createElement('option');
                 option.value = account.id;
-                option.textContent = account.name;
+                option.textContent = account['Account Name'];
                 select.appendChild(option);
             });
 
@@ -244,10 +246,12 @@ class TransactionsPage {
         let totalExpenses = 0;
 
         this.transactions.forEach(transaction => {
-            if (transaction.type === 'credit') {
-                totalIncome += transaction.amount;
+            const amount = transaction.Amount;
+            
+            if (amount > 0) {
+                totalIncome += amount;
             } else {
-                totalExpenses += Math.abs(transaction.amount);
+                totalExpenses += Math.abs(amount);
             }
         });
 
@@ -392,19 +396,19 @@ class TransactionsPage {
             const amountInput = document.getElementById('transaction-amount');
             const notesInput = document.getElementById('transaction-notes');
             
-            if (dateInput) dateInput.value = transaction.date;
+            if (dateInput) dateInput.value = transaction.Date;
             if (typeInput) typeInput.value = formType;
-            if (descInput) descInput.value = transaction.description;
-            if (categoryInput) categoryInput.value = transaction.category;
-            if (amountInput) amountInput.value = Math.abs(transaction.amount);
-            if (notesInput) notesInput.value = transaction.notes || '';
+            if (descInput) descInput.value = transaction.Description;
+            if (categoryInput) categoryInput.value = transaction.Category;
+            if (amountInput) amountInput.value = Math.abs(transaction.Amount);
+            if (notesInput) notesInput.value = transaction.Name || '';
             
             // Set account selection
             const accountSelect = document.getElementById('transaction-account');
             if (accountSelect) {
                 // Find account by name
                 const accountOption = Array.from(accountSelect.options).find(
-                    option => option.text === transaction.account
+                    option => option.text === transaction.Account
                 );
                 if (accountOption) {
                     accountSelect.value = accountOption.value;
@@ -530,10 +534,10 @@ class TransactionsPage {
         const term = searchTerm.toLowerCase();
         
         this.filteredTransactions = this.transactions.filter(transaction => 
-            transaction.description.toLowerCase().includes(term) ||
-            transaction.account.toLowerCase().includes(term) ||
-            transaction.category.toLowerCase().includes(term) ||
-            (transaction.notes && transaction.notes.toLowerCase().includes(term))
+            transaction.Description.toLowerCase().includes(term) ||
+            transaction.Account.toLowerCase().includes(term) ||
+            transaction.Category.toLowerCase().includes(term) ||
+            (transaction.Name && transaction.Name.toLowerCase().includes(term))
         );
         
         this.currentPage = 1;
@@ -658,13 +662,13 @@ class TransactionsPage {
     convertToCSV(transactions) {
         const headers = ['Date', 'Description', 'Account', 'Category', 'Amount', 'Status', 'Notes'];
         const rows = transactions.map(t => [
-            t.date,
-            t.description,
-            t.account,
-            t.category,
-            t.amount,
-            t.status,
-            t.notes || ''
+            t.Date,
+            t.Description,
+            t.Account,
+            t.Category,
+            t.Amount,
+            t.Status,
+            t.Name || ''
         ]);
 
         return [headers, ...rows]
