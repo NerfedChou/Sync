@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="39448abd-8dc7-4bbb-a102-e7da966d7ebc" name="Changes" comment="Libs">
-      <change beforePath="$PROJECT_DIR$/php/api/dashboard/kpi.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/dashboard/kpi.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/reports/profit-loss.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/reports/profit-loss.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/transactions.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/transactions.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +178,7 @@
       <workItem from="1762817192747" duration="18373000" />
       <workItem from="1762840416287" duration="3802000" />
       <workItem from="1762848097872" duration="7580000" />
-      <workItem from="1762881598850" duration="8682000" />
+      <workItem from="1762881598850" duration="9932000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -262,7 +260,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762890155891</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Libs">
+      <option name="closed" value="true" />
+      <created>1762890466748</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1762890466749</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
