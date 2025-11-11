@@ -21,6 +21,7 @@ class TransactionsPage {
         try {
             await this.loadData();
             this.setupEventListeners();
+            this.setupCurrencyChangeListener();
             this.updateStatistics();
         } catch (error) {
             console.error('Failed to initialize transactions page:', error);
@@ -126,7 +127,7 @@ class TransactionsPage {
                 <span class="transaction-category">${transaction.Category}</span>
             </td>
             <td class="${amountClass} font-medium transaction-amount">
-                ${amountPrefix}₱${Math.abs(transaction.Amount).toLocaleString()}
+                ${amountPrefix}${window.currencyUtils.formatCurrency(Math.abs(transaction.Amount))}
             </td>
             <td>
                 <span class="status-badge ${statusClass}">
@@ -689,13 +690,53 @@ class TransactionsPage {
     }
 
     /**
+     * Setup currency change listener
+     */
+    setupCurrencyChangeListener() {
+        window.addEventListener('currencyChanged', (e) => {
+            console.log('Transactions page: Currency changed to', e.detail.currency);
+            this.refreshAllDisplays();
+        });
+    }
+
+    /**
+     * Refresh all currency displays on transactions page
+     */
+    refreshAllDisplays() {
+        console.log('Transactions page: Refreshing all displays');
+        
+        // Refresh statistics
+        this.updateStatistics();
+        
+        // Refresh transactions table
+        this.displayTransactions();
+        
+        // Refresh any modal forms if open
+        const modal = document.getElementById('transaction-modal');
+        if (modal && modal.style.display !== 'none') {
+            this.refreshModalCurrencyDisplays();
+        }
+    }
+
+    /**
+     * Refresh currency displays in modal
+     */
+    refreshModalCurrencyDisplays() {
+        const amountInput = document.getElementById('transaction-amount');
+        if (amountInput && amountInput.value) {
+            // Keep the raw value, just update formatting if needed
+            const currentValue = parseFloat(amountInput.value);
+            if (!isNaN(currentValue)) {
+                console.log('Updated modal amount display');
+            }
+        }
+    }
+
+    /**
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(value);
+        return window.currencyUtils.formatCurrency(value);
     }
 
     /**

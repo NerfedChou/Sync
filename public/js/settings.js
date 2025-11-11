@@ -7,10 +7,28 @@ class SettingsManager {
     }
 
     init() {
-        this.setupTabNavigation();
-        this.loadSettingsToForm();
-        this.setupFormHandlers();
-        this.setupValidation();
+        console.log('SettingsManager initializing...');
+        
+        // Wait for currency utility to be ready
+        if (window.currencyUtils) {
+            console.log('Currency utils available, loading settings...');
+            console.log('Initial currency settings:', this.settings.general.defaultCurrency);
+            
+            this.setupTabNavigation();
+            this.loadSettingsToForm();
+            this.setupFormHandlers();
+            this.setupValidation();
+            
+            // Add currency change listener for debugging
+            window.addEventListener('currencyChanged', (e) => {
+                console.log('SettingsManager received currencyChanged event:', e.detail);
+            });
+            
+            console.log('SettingsManager initialized');
+        } else {
+            console.log('Currency utils not ready, retrying in 100ms...');
+            setTimeout(() => this.init(), 100);
+        }
     }
 
     setupTabNavigation() {
@@ -48,7 +66,7 @@ class SettingsManager {
                 companyEmail: 'contact@mybusiness.com',
                 companyPhone: '+1 234 567 8900',
                 companyAddress: '123 Business St\nSuite 100\nBusiness City, BC 12345',
-                defaultCurrency: 'PHP',
+                defaultCurrency: 'PHP', // Default to PHP
                 fiscalYearStart: '2024-01-01',
                 timezone: 'America/New_York'
             },
@@ -86,14 +104,32 @@ class SettingsManager {
     }
 
     loadSettingsToForm() {
+        console.log('Loading settings to form:', this.settings);
+        
         // General settings
-        document.getElementById('companyName').value = this.settings.general.companyName;
-        document.getElementById('companyEmail').value = this.settings.general.companyEmail;
-        document.getElementById('companyPhone').value = this.settings.general.companyPhone;
-        document.getElementById('companyAddress').value = this.settings.general.companyAddress;
-        document.getElementById('defaultCurrency').value = this.settings.general.defaultCurrency;
-        document.getElementById('fiscalYearStart').value = this.settings.general.fiscalYearStart;
-        document.getElementById('timezone').value = this.settings.general.timezone;
+        const companyName = document.getElementById('companyName');
+        const companyEmail = document.getElementById('companyEmail');
+        const companyPhone = document.getElementById('companyPhone');
+        const companyAddress = document.getElementById('companyAddress');
+        const defaultCurrency = document.getElementById('defaultCurrency');
+        const fiscalYearStart = document.getElementById('fiscalYearStart');
+        const timezone = document.getElementById('timezone');
+        
+        if (companyName) companyName.value = this.settings.general.companyName;
+        if (companyEmail) companyEmail.value = this.settings.general.companyEmail;
+        if (companyPhone) companyPhone.value = this.settings.general.companyPhone;
+        if (companyAddress) companyAddress.value = this.settings.general.companyAddress;
+        if (defaultCurrency) {
+            // Sync with currency utility current setting
+            const currentCurrency = window.currencyUtils.getCurrentCurrency();
+            this.settings.general.defaultCurrency = currentCurrency;
+            defaultCurrency.value = currentCurrency;
+            
+            console.log('Set currency selector to:', currentCurrency);
+            console.log('Currency selector value after setting:', defaultCurrency.value);
+        }
+        if (fiscalYearStart) fiscalYearStart.value = this.settings.general.fiscalYearStart;
+        if (timezone) timezone.value = this.settings.general.timezone;
 
         // Account settings
         document.getElementById('fullName').value = this.settings.account.fullName;
@@ -256,6 +292,26 @@ class SettingsManager {
     }
 
     saveSettings() {
+        console.log('Saving settings...');
+        
+        // Get current currency from form
+        const currencySelect = document.getElementById('defaultCurrency');
+        if (currencySelect) {
+            const newCurrency = currencySelect.value;
+            console.log('Currency selector value:', newCurrency);
+            console.log('Current settings currency:', this.settings.general.defaultCurrency);
+            
+            // Always update the settings object with current form value
+            this.settings.general.defaultCurrency = newCurrency;
+            
+            // Update currency utility
+            console.log('Updating currency utility to:', newCurrency);
+            window.currencyUtils.updateCurrencySettings(newCurrency);
+            this.showToast(`Currency changed to ${newCurrency}`, 'success');
+        } else {
+            console.error('Currency selector not found!');
+        }
+        
         localStorage.setItem('accountingSettings', JSON.stringify(this.settings));
         this.showToast('Settings saved successfully', 'success');
     }

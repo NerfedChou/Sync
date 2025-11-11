@@ -7,11 +7,18 @@ try {
     $db = new Database();
     $pdo = $db->getConnection();
     
-    // Get company_id from query parameter (required)
+    // Get company_id from query parameter (optional for demo)
     $company_id = $_GET['company_id'] ?? null;
     
+    // For demo purposes, use first company if no company_id provided
     if (!$company_id) {
-        Response::error("company_id parameter is required", 400);
+        try {
+            $companySql = "SELECT id FROM companies WHERE is_active = 1 LIMIT 1";
+            $companyResult = $db->fetchOne($companySql);
+            $company_id = $companyResult['id'] ?? 1;
+        } catch (Exception $e) {
+            $company_id = 1; // Fallback to company ID 1
+        }
     }
     
     // Query for KPI data using simplified structure

@@ -227,6 +227,11 @@ class App {
         window.addEventListener('popstate', (e) => {
             this.handleNavigation(e);
         });
+
+        // Handle currency changes
+        window.addEventListener('currencyChanged', (e) => {
+            this.handleCurrencyChange(e.detail.currency);
+        });
     }
 
     /**
@@ -307,6 +312,91 @@ class App {
             }
         });
     }
+
+    /**
+     * Handle currency change
+     */
+    handleCurrencyChange(currencyCode) {
+        console.log('Currency changed to:', currencyCode);
+        
+        // Refresh all currency displays on current page
+        this.refreshCurrencyDisplays();
+        
+        // Show success message
+        this.showSuccess(`Currency changed to ${currencyCode}`);
+        
+        // If there's a page-specific refresh method, call it
+        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+            if (window.dashboard && typeof window.dashboard.refreshAllData === 'function') {
+                window.dashboard.refreshAllData();
+            }
+        } else if (window.location.pathname.includes('accounts.html') && window.accountsManager) {
+            window.accountsManager.loadAccounts();
+        } else if (window.location.pathname.includes('transactions.html') && window.transactionManager) {
+            window.transactionManager.loadTransactions();
+        } else if (window.location.pathname.includes('reports.html') && window.reportsManager) {
+            window.reportsManager.refreshReports();
+        } else if (window.location.pathname.includes('companies.html') && window.companiesManager) {
+            window.companiesManager.loadCompanies();
+        }
+    }
+
+    /**
+     * Refresh all currency displays on page
+     */
+    refreshCurrencyDisplays() {
+        console.log('Refreshing currency displays');
+        
+        // Find all elements with currency values and refresh them
+        const currencyElements = document.querySelectorAll('[data-currency], .stat-value, .amount, .balance');
+        
+        currencyElements.forEach(element => {
+            const value = parseFloat(element.getAttribute('data-value') || element.textContent.replace(/[^\d.-]/g, ''));
+            if (!isNaN(value)) {
+                const formattedValue = window.currencyUtils.formatCurrency(value);
+                element.textContent = formattedValue;
+                console.log(`Updated ${element.id || element.className}: ${value} -> ${formattedValue}`);
+            }
+        });
+        
+        // Also refresh any elements that commonly contain currency values
+        const commonCurrencyElements = document.querySelectorAll('#total-revenue, #total-expenses, #net-profit, #cash-balance, #total-assets, #total-liabilities, #total-equity, #total-income, #net-change');
+        
+        commonCurrencyElements.forEach(element => {
+            const value = parseFloat(element.getAttribute('data-value') || element.textContent.replace(/[^\d.-]/g, ''));
+            if (!isNaN(value) && value !== 0) {
+                const formattedValue = window.currencyUtils.formatCurrency(value);
+                element.textContent = formattedValue;
+                console.log(`Updated ${element.id}: ${value} -> ${formattedValue}`);
+            }
+        });
+        
+        // Trigger page-specific refresh if available
+        this.triggerPageSpecificRefresh();
+    }
+
+    /**
+     * Trigger page-specific currency refresh
+     */
+    triggerPageSpecificRefresh() {
+        const currentPath = window.location.pathname;
+        
+        if (currentPath.includes('accounts.html') && window.accountsPage) {
+            window.accountsPage.refreshAllDisplays();
+        } else if (currentPath.includes('transactions.html') && window.transactionsPage) {
+            window.transactionsPage.refreshAllDisplays();
+        } else if (currentPath.includes('reports.html') && window.reportsPage) {
+            window.reportsPage.refreshAllDisplays();
+        } else if (currentPath.includes('companies.html') && window.companiesPage) {
+            window.companiesPage.refreshAllDisplays();
+        } else if ((currentPath.includes('index.html') || currentPath === '/') && window.dashboard) {
+            window.dashboard.refreshAllData();
+        }
+    }
+    
+    /**
+     * Pause background tasks when page is hidden
+     */
 
     /**
      * Pause background tasks when page is hidden
@@ -567,11 +657,24 @@ class App {
 
 // Global utility functions
 window.utils = {
-    formatCurrency: (value) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(value);
+    formatCurrency: (value, currencyCode = null) => {
+        return window.currencyUtils.formatCurrency(value, currencyCode);
+    },
+
+    // Test currency conversion
+    testCurrencyConversion: () => {
+        if (window.currencyUtils) {
+            console.log('Testing currency conversion (values in USD base):');
+            console.log('$1000 USD in PHP:', window.currencyUtils.formatCurrency(1000, 'PHP'));
+            console.log('$1000 USD in USD:', window.currencyUtils.formatCurrency(1000, 'USD'));
+            console.log('$1000 USD in EUR:', window.currencyUtils.formatCurrency(1000, 'EUR'));
+            console.log('$100 USD in PHP:', window.currencyUtils.formatCurrency(100, 'PHP'));
+            console.log('$50 USD in PHP:', window.currencyUtils.formatCurrency(50, 'PHP'));
+            console.log('Current display currency:', window.currencyUtils.getCurrentCurrency());
+            console.log('Exchange rates:', window.currencyUtils.getExchangeRates());
+        } else {
+            console.error('Currency utils not available');
+        }
     },
     
     formatDate: (dateString) => {
@@ -612,6 +715,14 @@ window.utils = {
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
+    
+    // Make test function available globally
+    window.testCurrency = window.utils.testCurrencyConversion;
+    window.refreshCurrency = () => window.app.refreshCurrencyDisplays();
+    
+    // Log that currency utils is ready
+    console.log('Application ready. Type testCurrency() in console to test currency conversion.');
+    console.log('Type refreshCurrency() to refresh all currency displays.');
 });
 
 // Export for use in other modules

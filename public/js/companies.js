@@ -21,6 +21,7 @@ class CompaniesPage {
         try {
             await this.loadData();
             this.setupEventListeners();
+            this.setupCurrencyChangeListener();
             this.updateStatistics();
             this.setupCompanySelector();
         } catch (error) {
@@ -753,13 +754,47 @@ class CompaniesPage {
     }
 
     /**
+     * Setup currency change listener
+     */
+    setupCurrencyChangeListener() {
+        window.addEventListener('currencyChanged', (e) => {
+            console.log('Companies page: Currency changed to', e.detail.currency);
+            this.refreshAllDisplays();
+        });
+    }
+
+    /**
+     * Refresh all currency displays on companies page
+     */
+    refreshAllDisplays() {
+        console.log('Companies page: Refreshing all displays');
+        
+        // Refresh statistics
+        this.updateStatistics();
+        
+        // Refresh companies table
+        this.displayCompanies();
+        
+        // Refresh any modal forms if open
+        const modal = document.getElementById('company-modal');
+        if (modal && modal.style.display !== 'none') {
+            this.refreshModalCurrencyDisplays();
+        }
+    }
+
+    /**
+     * Refresh currency displays in modal
+     */
+    refreshModalCurrencyDisplays() {
+        // Update any currency-related displays in modal
+        console.log('Updated companies modal currency displays');
+    }
+
+    /**
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(value);
+        return window.currencyUtils.formatCurrency(value);
     }
 
     /**

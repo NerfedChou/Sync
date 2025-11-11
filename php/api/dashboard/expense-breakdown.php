@@ -9,10 +9,17 @@ try {
     
     // Get parameters
     $company_id = $_GET['company_id'] ?? null;
-    $period = (int)($_GET['period'] ?? 30); // Default to 30 days
+    $period = (int)($_GET['period'] ?? 365); // Default to 365 days to show full year data
     
+    // For demo purposes, use first company if no company_id provided
     if (!$company_id) {
-        Response::error("company_id parameter is required", 400);
+        try {
+            $companySql = "SELECT id FROM companies WHERE is_active =1 LIMIT 1";
+            $companyResult = $db->fetchOne($companySql);
+            $company_id = $companyResult['id'] ?? 1;
+        } catch (Exception $e) {
+            $company_id = 1; // Fallback to company ID 1
+        }
     }
     
     // Calculate date range
@@ -20,18 +27,17 @@ try {
     $startDate = date('Y-m-d', strtotime("-{$period} days"));
     
     // Query for expense breakdown by actual expense accounts/items
+    // Include all expense transactions regardless of status for comprehensive view
     $sql = "
         SELECT 
             COALESCE(account, 'Uncategorized') as label,
             SUM(CASE 
-                WHEN status = 'completed' 
-                AND (category LIKE '%Expense%' OR account LIKE '%Expense%') 
-                THEN amount ELSE 0 END
+                WHEN (category LIKE '%Expense%' OR account LIKE '%Expense%') 
+                THEN ABS(amount) ELSE 0 END
             ) as data
         FROM transactions_simple 
         WHERE company_id = ? 
             AND date BETWEEN ? AND ?
-            AND status = 'completed'
             AND (category LIKE '%Expense%' OR account LIKE '%Expense%')
         GROUP BY COALESCE(account, 'Uncategorized')
         ORDER BY data DESC

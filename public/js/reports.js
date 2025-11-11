@@ -19,6 +19,7 @@ class ReportsPage {
     async init() {
         try {
             this.setupEventListeners();
+            this.setupCurrencyChangeListener();
             await this.generateReport();
         } catch (error) {
             console.error('Failed to initialize reports page:', error);
@@ -312,7 +313,7 @@ class ReportsPage {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '₱' + value.toLocaleString();
+                                    return window.currencyUtils.formatCurrency(value);
                                 }
                             }
                         }
@@ -396,7 +397,7 @@ class ReportsPage {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '₱' + value.toLocaleString();
+                                    return window.currencyUtils.formatCurrency(value);
                                 }
                             }
                         }
@@ -561,13 +562,55 @@ class ReportsPage {
     }
 
     /**
+     * Setup currency change listener
+     */
+    setupCurrencyChangeListener() {
+        window.addEventListener('currencyChanged', (e) => {
+            console.log('Reports page: Currency changed to', e.detail.currency);
+            this.refreshAllDisplays();
+        });
+    }
+
+    /**
+     * Refresh all currency displays on reports page
+     */
+    refreshAllDisplays() {
+        console.log('Reports page: Refreshing all displays');
+        
+        // Regenerate current report with new currency
+        this.generateReport();
+        
+        // Update all summary displays
+        this.updateSummaryDisplays();
+    }
+
+    /**
+     * Update summary displays with current currency
+     */
+    updateSummaryDisplays() {
+        if (!this.reportData) return;
+        
+        // Update profit & loss summary
+        const totalRevenue = document.getElementById('total-revenue');
+        const totalExpenses = document.getElementById('total-expenses');
+        const netProfit = document.getElementById('net-profit');
+        
+        if (totalRevenue && this.reportData.revenue) {
+            totalRevenue.textContent = this.formatCurrency(this.reportData.revenue.total);
+        }
+        if (totalExpenses && this.reportData.expenses) {
+            totalExpenses.textContent = this.formatCurrency(Math.abs(this.reportData.expenses.total));
+        }
+        if (netProfit && this.reportData.net_profit !== undefined) {
+            netProfit.textContent = this.formatCurrency(this.reportData.net_profit);
+        }
+    }
+
+    /**
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(value);
+        return window.currencyUtils.formatCurrency(value);
     }
 
     /**

@@ -45,8 +45,15 @@ try {
     $company_id = $_GET['company_id'] ?? null;
     $period = (int)($_GET['period'] ?? 30); // Default to 30 days
     
+    // For demo purposes, use first company if no company_id provided
     if (!$company_id) {
-        Response::error("company_id parameter is required", 400);
+        try {
+            $companySql = "SELECT id FROM companies WHERE is_active =1 LIMIT 1";
+            $companyResult = $db->fetchOne($companySql);
+            $company_id = $companyResult['id'] ?? 1;
+        } catch (Exception $e) {
+            $company_id = 1; // Fallback to company ID 1
+        }
     }
     
     // Calculate date range

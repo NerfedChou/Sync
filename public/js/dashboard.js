@@ -24,6 +24,7 @@ class Dashboard {
             await this.loadAccountSummary();
             await this.loadRecentTransactions();
             this.setupEventListeners();
+            this.setupCurrencyChangeListener();
             
             // Small delay to ensure DOM is fully ready
             setTimeout(() => {
@@ -223,6 +224,11 @@ class Dashboard {
             const period = document.getElementById('revenue-period').value;
             const response = await apiService.getExpenseBreakdown(period);
             const data = response.success ? response.data : response;
+            
+            console.log('Expense breakdown raw response:', response);
+            console.log('Expense breakdown processed data:', data);
+            console.log('Expense labels:', data.labels);
+            console.log('Expense amounts:', data.data);
             
             const canvas = document.getElementById('expense-chart');
             if (!canvas) {
@@ -476,10 +482,7 @@ class Dashboard {
                             displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Revenue: ' + new Intl.NumberFormat('en-PH', {
-                                        style: 'currency',
-                                        currency: 'PHP'
-                                    }).format(context.parsed.y);
+                                    return 'Revenue: ' + window.currencyUtils.formatCurrency(context.parsed.y);
                                 }
                             }
                         }
@@ -492,7 +495,7 @@ class Dashboard {
                             },
                             ticks: {
                                 callback: function(value) {
-                                    return '₱' + value.toLocaleString();
+                                    return window.currencyUtils.formatCurrency(value);
                                 },
                                 font: {
                                     size: 12
@@ -665,11 +668,63 @@ class Dashboard {
         }
     }
 
+    /**
+     * Setup currency change listener
+     */
+    setupCurrencyChangeListener() {
+        window.addEventListener('currencyChanged', (e) => {
+            console.log('Dashboard: Currency changed to', e.detail.currency);
+            this.refreshAllData();
+        });
+    }
+
+    /**
+     * Refresh all dashboard data with new currency
+     */
+    async refreshAllData() {
+        console.log('Dashboard: Refreshing all data');
+        
+        try {
+            // Refresh KPI data
+            await this.loadKPIData();
+            
+            // Refresh account summary
+            await this.loadAccountSummary();
+            
+            // Refresh recent transactions
+            await this.loadRecentTransactions();
+            
+            // Refresh charts
+            this.refreshCharts();
+            
+            console.log('Dashboard: All data refreshed');
+        } catch (error) {
+            console.error('Dashboard: Failed to refresh data:', error);
+        }
+    }
+
+    /**
+     * Refresh all charts with new currency
+     */
+    refreshCharts() {
+        // Update trend chart
+        if (this.trendChart) {
+            this.updateTrendChart();
+        }
+        
+        // Update expense chart
+        if (this.expenseChart) {
+            this.updateExpenseChart();
+        }
+        
+        // Update profit/loss chart
+        if (this.profitLossChart) {
+            this.updateProfitLossChart();
+        }
+    }
+
     formatCurrency(amount) {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(amount);
+        return window.currencyUtils.formatCurrency(amount);
     }
 
     formatDate(dateString) {

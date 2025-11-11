@@ -38,6 +38,96 @@ class ApiService {
     }
 
     /**
+     * Get mock data for dashboard when backend is not available
+     */
+    getMockData(endpoint) {
+        console.log('Returning mock data for:', endpoint);
+        
+        // Mock KPI data
+        if (endpoint.includes('/dashboard/kpi')) {
+            return {
+                success: true,
+                data: {
+                    totalRevenue: 150000, // $150,000 USD base
+                    totalExpenses: 85000,  // $85,000 USD base
+                    netProfit: 65000,      // $65,000 USD base
+                    cashBalance: 45000      // $45,000 USD base
+                }
+            };
+        }
+        
+        // Mock revenue trends
+        if (endpoint.includes('/dashboard/revenue-trends')) {
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const data = [12000, 15000, 18000, 22000, 25000, 28000];
+            return {
+                success: true,
+                data: {
+                    labels: labels,
+                    data: data
+                }
+            };
+        }
+        
+        // Mock expense breakdown
+        if (endpoint.includes('/dashboard/expense-breakdown')) {
+            return {
+                success: true,
+                data: {
+                    labels: ['Salaries', 'Rent', 'Marketing', 'Utilities', 'Supplies'],
+                    data: [35000, 15000, 12000, 8000, 5000]
+                }
+            };
+        }
+        
+        // Mock profit/loss
+        if (endpoint.includes('/dashboard/profit-loss')) {
+            return {
+                success: true,
+                data: {
+                    revenue: [12000, 15000, 18000, 22000, 25000, 28000],
+                    expenses: [8000, 9500, 11000, 13500, 15000, 16500],
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+                }
+            };
+        }
+        
+        // Mock accounts
+        if (endpoint.includes('/accounts')) {
+            return {
+                success: true,
+                data: [
+                    { id: 1, Name: 'Cash', Type: 'asset', Balance: 25000 },
+                    { id: 2, Name: 'Accounts Receivable', Type: 'asset', Balance: 15000 },
+                    { id: 3, Name: 'Accounts Payable', Type: 'liability', Balance: -8000 },
+                    { id: 4, Name: 'Revenue', Type: 'revenue', Balance: 150000 },
+                    { id: 5, Name: 'Office Expenses', Type: 'expense', Balance: -35000 }
+                ]
+            };
+        }
+        
+        // Mock transactions
+        if (endpoint.includes('/transactions')) {
+            return {
+                success: true,
+                data: [
+                    { id: 1, Date: '2024-01-15', Description: 'Client Payment', Category: 'Revenue', Account: 'Cash', Amount: 5000, Status: 'completed' },
+                    { id: 2, Date: '2024-01-14', Description: 'Office Rent', Category: 'Rent', Account: 'Cash', Amount: -2000, Status: 'completed' },
+                    { id: 3, Date: '2024-01-13', Description: 'Software License', Category: 'Supplies', Account: 'Cash', Amount: -500, Status: 'completed' },
+                    { id: 4, Date: '2024-01-12', Description: 'Consulting Income', Category: 'Revenue', Account: 'Cash', Amount: 3000, Status: 'completed' },
+                    { id: 5, Date: '2024-01-11', Description: 'Utilities', Category: 'Utilities', Account: 'Cash', Amount: -800, Status: 'completed' }
+                ]
+            };
+        }
+        
+        // Default mock response
+        return {
+            success: true,
+            data: []
+        };
+    }
+
+    /**
      * GET request
      */
     async get(endpoint, params = {}) {

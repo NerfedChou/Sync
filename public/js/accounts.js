@@ -18,6 +18,7 @@ class AccountsPage {
         try {
             await this.loadAccounts();
             this.setupEventListeners();
+            this.setupCurrencyChangeListener();
             this.updateStatistics();
         } catch (error) {
             console.error('Failed to initialize accounts page:', error);
@@ -380,13 +381,53 @@ class AccountsPage {
     }
 
     /**
+     * Setup currency change listener
+     */
+    setupCurrencyChangeListener() {
+        window.addEventListener('currencyChanged', (e) => {
+            console.log('Accounts page: Currency changed to', e.detail.currency);
+            this.refreshAllDisplays();
+        });
+    }
+
+    /**
+     * Refresh all currency displays on accounts page
+     */
+    refreshAllDisplays() {
+        console.log('Accounts page: Refreshing all displays');
+        
+        // Refresh statistics
+        this.updateStatistics();
+        
+        // Refresh accounts table
+        this.displayAccounts();
+        
+        // Refresh any modal forms if open
+        const modal = document.getElementById('account-modal');
+        if (modal && modal.style.display !== 'none') {
+            this.refreshModalCurrencyDisplays();
+        }
+    }
+
+    /**
+     * Refresh currency displays in modal
+     */
+    refreshModalCurrencyDisplays() {
+        const balanceInput = document.getElementById('account-balance');
+        if (balanceInput && balanceInput.value) {
+            // Keep the raw value, just update placeholder if needed
+            const currentValue = parseFloat(balanceInput.value);
+            if (!isNaN(currentValue)) {
+                console.log('Updated modal balance display');
+            }
+        }
+    }
+
+    /**
      * Format currency value
      */
     formatCurrency(value) {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(value);
+        return window.currencyUtils.formatCurrency(value);
     }
 
     /**
