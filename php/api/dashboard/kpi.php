@@ -30,9 +30,9 @@ try {
     ";
     
     $expenseSql = "
-        SELECT COALESCE(SUM(amount), 0) as totalExpenses
+        SELECT COALESCE(SUM(ABS(amount)), 0) as totalExpenses
         FROM transactions_simple 
-        WHERE company_id = ? AND status = 'completed' 
+        WHERE company_id = ? 
         AND (category LIKE '%Expense%' OR account LIKE '%Expense%')
     ";
     

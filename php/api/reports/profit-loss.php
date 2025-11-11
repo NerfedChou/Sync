@@ -40,7 +40,6 @@ try {
         FROM transactions_simple
         WHERE company_id = ? 
             AND date BETWEEN ? AND ?
-            AND status = 'completed'
             AND (category LIKE '%Revenue%' OR category LIKE '%Income%' OR account LIKE '%Revenue%')
         GROUP BY category
         ORDER BY total DESC
@@ -51,12 +50,11 @@ try {
     // Query expense data from simplified transactions
     $expenseSql = "
         SELECT 
-            COALESCE(SUM(amount), 0) as total,
+            COALESCE(SUM(ABS(amount)), 0) as total,
             category
         FROM transactions_simple
         WHERE company_id = ? 
             AND date BETWEEN ? AND ?
-            AND status = 'completed'
             AND (category LIKE '%Expense%' OR category LIKE '%Cost%' OR account LIKE '%Expense%')
         GROUP BY category
         ORDER BY total DESC

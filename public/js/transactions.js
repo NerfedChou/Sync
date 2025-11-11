@@ -247,12 +247,36 @@ class TransactionsPage {
         let totalExpenses = 0;
 
         this.transactions.forEach(transaction => {
-            const amount = transaction.Amount;
+            const amount = parseFloat(transaction.Amount) || 0;
+            const category = (transaction.Category || '').toLowerCase();
+            const account = (transaction.Account || '').toLowerCase();
             
-            if (amount > 0) {
+            // Determine if transaction is expense based on category/account names
+            const isExpense = category.includes('expense') || 
+                            account.includes('expense') || 
+                            category.includes('payroll') ||
+                            category.includes('utilities') ||
+                            category.includes('office') ||
+                            category.includes('software') ||
+                            category.includes('capital') ||
+                            account.includes('salaries') ||
+                            account.includes('rent') ||
+                            account.includes('software') ||
+                            account.includes('utilities') ||
+                            account.includes('office') ||
+                            account.includes('equipment');
+            
+            // Determine if transaction is revenue based on category/account names  
+            const isRevenue = category.includes('revenue') || 
+                            account.includes('revenue') ||
+                            category.includes('service') ||
+                            account.includes('service') ||
+                            account.includes('receivable');
+            
+            if (isExpense) {
+                totalExpenses += amount;
+            } else if (isRevenue) {
                 totalIncome += amount;
-            } else {
-                totalExpenses += Math.abs(amount);
             }
         });
 
