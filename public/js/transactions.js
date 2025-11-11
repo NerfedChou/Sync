@@ -43,8 +43,7 @@ class TransactionsPage {
             this.populateAccountSelects();
         } catch (error) {
             console.error('Error loading data:', error);
-            // Use mock data for demo
-            this.loadMockData();
+            this.showError('Failed to load transactions data');
         }
     }
 
@@ -65,140 +64,7 @@ class TransactionsPage {
         return this.accounts;
     }
 
-    /**
-     * Load mock data for demo purposes
-     */
-    loadMockData() {
-        this.transactions = [
-            {
-                id: 1,
-                date: '2024-01-15',
-                description: 'Client Payment - ABC Corp',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Revenue',
-                amount: 12500.00,
-                type: 'income',
-                status: 'completed',
-                debit_account: 'Accounts Receivable',
-                credit_account: 'Business Checking',
-                notes: 'Monthly consulting services payment'
-            },
-            {
-                id: 2,
-                date: '2024-01-14',
-                description: 'Office Rent Payment',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Expenses',
-                amount: -3500.00,
-                type: 'expense',
-                status: 'completed',
-                debit_account: 'Rent Expense',
-                credit_account: 'Business Checking',
-                notes: 'January office rent'
-            },
-            {
-                id: 3,
-                date: '2024-01-13',
-                description: 'Software Subscription',
-                account: 'Business Credit Card',
-                account_id: 3,
-                category: 'Expenses',
-                amount: -299.00,
-                type: 'expense',
-                status: 'completed',
-                debit_account: 'Software Expense',
-                credit_account: 'Business Credit Card',
-                notes: 'Annual software license'
-            },
-            {
-                id: 4,
-                date: '2024-01-12',
-                description: 'Client Payment - XYZ Ltd',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Revenue',
-                amount: 8750.00,
-                type: 'income',
-                status: 'pending',
-                debit_account: 'Accounts Receivable',
-                credit_account: 'Business Checking',
-                notes: 'Web development project payment'
-            },
-            {
-                id: 5,
-                date: '2024-01-11',
-                description: 'Employee Salaries',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Expenses',
-                amount: -12500.00,
-                type: 'expense',
-                status: 'completed',
-                debit_account: 'Salaries Expense',
-                credit_account: 'Business Checking',
-                notes: 'January payroll'
-            },
-            {
-                id: 6,
-                date: '2024-01-10',
-                description: 'Equipment Purchase',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Assets',
-                amount: -2500.00,
-                type: 'expense',
-                status: 'completed',
-                debit_account: 'Equipment',
-                credit_account: 'Business Checking',
-                notes: 'New laptop for development team'
-            },
-            {
-                id: 7,
-                date: '2024-01-09',
-                description: 'Consulting Income',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Revenue',
-                amount: 3500.00,
-                type: 'income',
-                status: 'completed',
-                debit_account: 'Accounts Receivable',
-                credit_account: 'Business Checking',
-                notes: 'Strategic consulting session'
-            },
-            {
-                id: 8,
-                date: '2024-01-08',
-                description: 'Utility Bills',
-                account: 'Business Checking',
-                account_id: 2,
-                category: 'Expenses',
-                amount: -450.00,
-                type: 'expense',
-                status: 'completed',
-                debit_account: 'Utilities Expense',
-                credit_account: 'Business Checking',
-                notes: 'Electricity and internet for January'
-            }
-        ];
 
-        this.accounts = [
-            { id: 1, name: 'Cash and Cash Equivalents', type: 'asset' },
-            { id: 2, name: 'Business Checking Account', type: 'asset' },
-            { id: 3, name: 'Business Credit Card', type: 'liability' },
-            { id: 4, name: 'Accounts Receivable', type: 'asset' },
-            { id: 5, name: 'Accounts Payable', type: 'liability' },
-            { id: 6, name: 'Owner\'s Equity', type: 'equity' },
-            { id: 7, name: 'Sales Revenue', type: 'revenue' },
-            { id: 8, name: 'Operating Expenses', type: 'expense' }
-        ];
-
-        this.filteredTransactions = [...this.transactions];
-        this.displayTransactions();
-        this.populateAccountSelects();
-    }
 
     /**
      * Display transactions in the table
@@ -239,8 +105,10 @@ class TransactionsPage {
     createTransactionRow(transaction) {
         const row = document.createElement('tr');
         
-        const amountClass = transaction.amount >= 0 ? 'text-green-600' : 'text-red-600';
-        const amountPrefix = transaction.amount >= 0 ? '+' : '';
+        // Handle both credit/debit and positive/negative amounts
+        const isCredit = transaction.type === 'credit' || transaction.amount > 0;
+        const amountClass = isCredit ? 'text-green-600' : 'text-red-600';
+        const amountPrefix = isCredit ? '+' : '-';
         const statusClass = transaction.status === 'completed' ? 'status-badge--active' : 'status-badge--pending';
         
         row.innerHTML = `
@@ -250,7 +118,6 @@ class TransactionsPage {
             <td>${this.formatDate(transaction.date)}</td>
             <td class="transaction-description">
                 <strong>${transaction.description}</strong>
-                ${transaction.notes ? `<br><small class="text-muted">${transaction.notes}</small>` : ''}
             </td>
             <td>${transaction.account}</td>
             <td>
@@ -377,7 +244,7 @@ class TransactionsPage {
         let totalExpenses = 0;
 
         this.transactions.forEach(transaction => {
-            if (transaction.amount >= 0) {
+            if (transaction.type === 'credit') {
                 totalIncome += transaction.amount;
             } else {
                 totalExpenses += Math.abs(transaction.amount);
@@ -505,20 +372,44 @@ class TransactionsPage {
         this.currentEditId = null;
 
         // Set default date to today
-        document.getElementById('transaction-date').value = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('transaction-date');
+        if (dateInput) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
 
         if (transaction) {
             // Edit mode
             title.textContent = 'Edit Transaction';
             this.currentEditId = transaction.id;
             
-            document.getElementById('transaction-date').value = transaction.date;
-            document.getElementById('transaction-type').value = transaction.type;
-            document.getElementById('transaction-description').value = transaction.description;
-            document.getElementById('transaction-account').value = transaction.account_id;
-            document.getElementById('transaction-category').value = transaction.category;
-            document.getElementById('transaction-amount').value = Math.abs(transaction.amount);
-            document.getElementById('transaction-notes').value = transaction.notes || '';
+            // Convert credit/debit to income/expense for form
+            const formType = transaction.type === 'credit' ? 'income' : 'expense';
+            
+            const dateInput = document.getElementById('transaction-date');
+            const typeInput = document.getElementById('transaction-type');
+            const descInput = document.getElementById('transaction-description');
+            const categoryInput = document.getElementById('transaction-category');
+            const amountInput = document.getElementById('transaction-amount');
+            const notesInput = document.getElementById('transaction-notes');
+            
+            if (dateInput) dateInput.value = transaction.date;
+            if (typeInput) typeInput.value = formType;
+            if (descInput) descInput.value = transaction.description;
+            if (categoryInput) categoryInput.value = transaction.category;
+            if (amountInput) amountInput.value = Math.abs(transaction.amount);
+            if (notesInput) notesInput.value = transaction.notes || '';
+            
+            // Set account selection
+            const accountSelect = document.getElementById('transaction-account');
+            if (accountSelect) {
+                // Find account by name
+                const accountOption = Array.from(accountSelect.options).find(
+                    option => option.text === transaction.account
+                );
+                if (accountOption) {
+                    accountSelect.value = accountOption.value;
+                }
+            }
         } else {
             // Add mode
             title.textContent = 'Add New Transaction';
@@ -589,22 +480,24 @@ class TransactionsPage {
      * Save transaction
      */
     async saveTransaction() {
+        const transactionType = document.getElementById('transaction-type').value;
+        const amount = parseFloat(document.getElementById('transaction-amount').value) || 0;
+        
+        // Convert income/expense to credit/debit
+        let apiType = 'credit';
+        if (transactionType === 'expense') {
+            apiType = 'debit';
+        }
+        
         const formData = {
             date: document.getElementById('transaction-date').value,
-            type: document.getElementById('transaction-type').value,
+            type: apiType,
             description: document.getElementById('transaction-description').value,
-            account_id: parseInt(document.getElementById('transaction-account').value),
+            account: document.getElementById('transaction-account').options[document.getElementById('transaction-account').selectedIndex].text,
             category: document.getElementById('transaction-category').value,
-            amount: parseFloat(document.getElementById('transaction-amount').value),
-            notes: document.getElementById('transaction-notes').value,
-            debit_account: document.getElementById('debit-account').value,
-            credit_account: document.getElementById('credit-account').value
+            amount: amount,
+            notes: document.getElementById('transaction-notes').value || ''
         };
-
-        // Adjust amount based on type
-        if (formData.type === 'expense') {
-            formData.amount = -Math.abs(formData.amount);
-        }
 
         try {
             if (this.currentEditId) {

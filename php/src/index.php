@@ -47,9 +47,9 @@ switch ($path) {
         
     case '/dashboard/kpi':
         echo json_encode([
-            'totalRevenue' => 125430.50,
+            'totalRevenue' => 1430.50,
             'totalExpenses' => 87320.75,
-            'netProfit' => 38109.75,
+            'netProfit' => 309.75,
             'cashBalance' => 62500.00
         ]);
         break;
@@ -84,7 +84,7 @@ switch ($path) {
         $accounts = [
             [
                 'id' => 1,
-                'name' => 'Business Checking',
+                'name' => 'Business',
                 'type' => 'asset',
                 'balance' => 45230.50,
                 'currency' => 'USD',
@@ -263,7 +263,7 @@ switch ($path) {
             [
                 'id' => 1,
                 'date' => '2024-01-15',
-                'description' => 'Client Payment - ABC Corp',
+                'description' => 'Client Payment',
                 'category' => 'Revenue',
                 'account' => 'Business Checking',
                 'amount' => 12500.00,
@@ -422,6 +422,115 @@ switch ($path) {
         ]);
         break;
         
+    case '/analytics':
+        echo json_encode([
+            'revenue_growth' => 15.3,
+            'expense_growth' => 8.7,
+            'profit_margin' => 30.4,
+            'roi' => 24.8,
+            'cash_flow_trend' => 12.5,
+            'top_performing_categories' => [
+                ['category' => 'Consulting', 'revenue' => 45000.00, 'growth' => 18.2],
+                ['category' => 'Product Sales', 'revenue' => 35000.00, 'growth' => 12.1],
+                ['category' => 'Services', 'revenue' => 28500.00, 'growth' => 8.7],
+                ['category' => 'Other Revenue', 'revenue' => 16930.50, 'growth' => 5.3]
+            ],
+            'expense_trends' => [
+                ['category' => 'Salaries', 'amount' => 35000.00, 'change' => 5.2],
+                ['category' => 'Rent', 'amount' => 12000.00, 'change' => 0.0],
+                ['category' => 'Marketing', 'amount' => 8500.00, 'change' => -8.3],
+                ['category' => 'Utilities', 'amount' => 4500.00, 'change' => 12.5],
+                ['category' => 'Supplies', 'amount' => 3200.00, 'change' => 3.1]
+            ],
+            'monthly_performance' => [
+                ['month' => 'Jan', 'revenue' => 9500.00, 'expenses' => 7200.00, 'profit' => 2300.00],
+                ['month' => 'Feb', 'revenue' => 10200.00, 'expenses' => 7800.00, 'profit' => 2400.00],
+                ['month' => 'Mar', 'revenue' => 11800.00, 'expenses' => 8100.00, 'profit' => 3700.00],
+                ['month' => 'Apr', 'revenue' => 12500.00, 'expenses' => 8500.00, 'profit' => 4000.00],
+                ['month' => 'May', 'revenue' => 13200.00, 'expenses' => 8900.00, 'profit' => 4300.00],
+                ['month' => 'Jun', 'revenue' => 13800.00, 'expenses' => 9200.00, 'profit' => 4600.00]
+            ]
+        ]);
+        break;
+        
+    case '/analytics/categories':
+        echo json_encode([
+            'revenue_categories' => [
+                ['name' => 'Consulting', 'amount' => 45000.00, 'percentage' => 35.9, 'growth' => 18.2],
+                ['name' => 'Product Sales', 'amount' => 35000.00, 'percentage' => 27.9, 'growth' => 12.1],
+                ['name' => 'Services', 'amount' => 28500.00, 'percentage' => 22.7, 'growth' => 8.7],
+                ['name' => 'Other Revenue', 'amount' => 16930.50, 'percentage' => 13.5, 'growth' => 5.3]
+            ],
+            'expense_categories' => [
+                ['name' => 'Salaries', 'amount' => 35000.00, 'percentage' => 40.1, 'change' => 5.2],
+                ['name' => 'Rent', 'amount' => 12000.00, 'percentage' => 13.7, 'change' => 0.0],
+                ['name' => 'Marketing', 'amount' => 8500.00, 'percentage' => 9.7, 'change' => -8.3],
+                ['name' => 'Utilities', 'amount' => 4500.00, 'percentage' => 5.2, 'change' => 12.5],
+                ['name' => 'Supplies', 'amount' => 3200.00, 'percentage' => 3.7, 'change' => 3.1],
+                ['name' => 'Other Expenses', 'amount' => 24120.75, 'percentage' => 27.6, 'change' => 8.9]
+            ]
+        ]);
+        break;
+        
+    case '/analytics/accounts':
+        echo json_encode([
+            'account_performance' => [
+                ['account' => 'Business Checking', 'balance' => 45230.50, 'transactions' => 156, 'avg_transaction' => 290.00],
+                ['account' => 'Business Savings', 'balance' => 125000.00, 'transactions' => 24, 'avg_transaction' => 5208.00],
+                ['account' => 'Business Credit Card', 'balance' => -3250.75, 'transactions' => 89, 'avg_transaction' => -36.50],
+                ['account' => 'Payroll Account', 'balance' => 18500.00, 'transactions' => 12, 'avg_transaction' => 1541.00],
+                ['account' => 'Tax Reserve', 'balance' => 25000.00, 'transactions' => 4, 'avg_transaction' => 6250.00]
+            ],
+            'account_trends' => [
+                ['account' => 'Business Checking', 'jan' => 42000.00, 'feb' => 43500.00, 'mar' => 45230.50, 'change' => 7.7],
+                ['account' => 'Business Savings', 'jan' => 115000.00, 'feb' => 120000.00, 'mar' => 125000.00, 'change' => 8.7],
+                ['account' => 'Accounts Receivable', 'jan' => 12000.00, 'feb' => 15000.00, 'mar' => 18500.00, 'change' => 54.2]
+            ]
+        ]);
+        break;
+        
+    case '/auth/login':
+        // Mock authentication - accept any credentials for demo
+        $input = json_decode(file_get_contents('php://input'), true);
+        $username = $input['username'] ?? '';
+        $password = $input['password'] ?? '';
+        
+        if (empty($username) || empty($password)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Username and password required']);
+            break;
+        }
+        
+        // Mock successful login
+        echo json_encode([
+            'success' => true,
+            'token' => 'mock-jwt-token-' . bin2hex(random_bytes(16)),
+            'user' => [
+                'id' => 1,
+                'username' => $username,
+                'name' => 'Demo User',
+                'email' => $username . '@example.com',
+                'role' => 'admin'
+            ],
+            'expires_in' => 3600
+        ]);
+        break;
+        
+    case '/auth/logout':
+        echo json_encode([
+            'success' => true,
+            'message' => 'Logged out successfully'
+        ]);
+        break;
+        
+    case '/auth/refresh':
+        echo json_encode([
+            'success' => true,
+            'token' => 'mock-jwt-token-' . bin2hex(random_bytes(16)),
+            'expires_in' => 3600
+        ]);
+        break;
+        
     default:
         http_response_code(404);
         echo json_encode([
@@ -431,13 +540,22 @@ switch ($path) {
                 'GET /api/' => 'API Information',
                 'GET /api/dashboard' => 'Dashboard data',
                 'GET /api/dashboard/kpi' => 'KPI data',
+                'GET /api/dashboard/revenue-trends' => 'Revenue trends data',
+                'GET /api/dashboard/expense-breakdown' => 'Expense breakdown data',
                 'GET /api/accounts' => 'List accounts',
                 'POST /api/accounts' => 'Create account',
                 'GET /api/transactions' => 'List transactions',
+                'GET /api/transactions/recent' => 'Recent transactions',
                 'POST /api/transactions' => 'Create transaction',
                 'GET /api/reports/profit-loss' => 'Profit & Loss report',
                 'GET /api/reports/balance-sheet' => 'Balance Sheet report',
-                'GET /api/reports/cash-flow' => 'Cash Flow report'
+                'GET /api/reports/cash-flow' => 'Cash Flow report',
+                'GET /api/analytics' => 'Analytics overview',
+                'GET /api/analytics/categories' => 'Category analytics',
+                'GET /api/analytics/accounts' => 'Account analytics',
+                'POST /api/auth/login' => 'User login',
+                'POST /api/auth/logout' => 'User logout',
+                'POST /api/auth/refresh' => 'Refresh token'
             ]
         ]);
         break;

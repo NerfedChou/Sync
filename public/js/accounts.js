@@ -35,101 +35,11 @@ class AccountsPage {
             this.displayAccounts();
         } catch (error) {
             console.error('Error loading accounts:', error);
-            // Use mock data for demo
-            this.loadMockAccounts();
+            this.showError('Failed to load accounts');
         }
     }
 
-    /**
-     * Load mock accounts for demo purposes
-     */
-    loadMockAccounts() {
-        this.accounts = [
-            {
-                id: 1,
-                code: '1000',
-                name: 'Cash and Cash Equivalents',
-                type: 'asset',
-                description: 'Physical currency and demand deposits',
-                balance: 25000.00,
-                status: 'active',
-                parent_id: null
-            },
-            {
-                id: 2,
-                code: '1010',
-                name: 'Business Checking Account',
-                type: 'asset',
-                description: 'Primary business checking account',
-                balance: 22500.00,
-                status: 'active',
-                parent_id: 1
-            },
-            {
-                id: 3,
-                code: '1020',
-                name: 'Petty Cash',
-                type: 'asset',
-                description: 'Small cash fund for minor expenses',
-                balance: 2500.00,
-                status: 'active',
-                parent_id: 1
-            },
-            {
-                id: 4,
-                code: '1200',
-                name: 'Accounts Receivable',
-                type: 'asset',
-                description: 'Money owed to the company by customers',
-                balance: 15000.00,
-                status: 'active',
-                parent_id: null
-            },
-            {
-                id: 5,
-                code: '2000',
-                name: 'Accounts Payable',
-                type: 'liability',
-                description: 'Money owed by the company to suppliers',
-                balance: -8500.00,
-                status: 'active',
-                parent_id: null
-            },
-            {
-                id: 6,
-                code: '3000',
-                name: 'Owner\'s Equity',
-                type: 'equity',
-                description: 'Owner investment and retained earnings',
-                balance: 31500.00,
-                status: 'active',
-                parent_id: null
-            },
-            {
-                id: 7,
-                code: '4000',
-                name: 'Sales Revenue',
-                type: 'revenue',
-                description: 'Income from primary business operations',
-                balance: 125430.50,
-                status: 'active',
-                parent_id: null
-            },
-            {
-                id: 8,
-                code: '5000',
-                name: 'Operating Expenses',
-                type: 'expense',
-                description: 'Day-to-day business expenses',
-                balance: -87320.75,
-                status: 'active',
-                parent_id: null
-            }
-        ];
-        
-        this.filteredAccounts = [...this.accounts];
-        this.displayAccounts();
-    }
+
 
     /**
      * Display accounts in the table
@@ -168,15 +78,12 @@ class AccountsPage {
         const balanceClass = account.balance >= 0 ? 'text-green-600' : 'text-red-600';
         
         row.innerHTML = `
-            <td class="account-code">${account.code}</td>
             <td class="account-name">
                 <strong>${account.name}</strong>
-                ${account.parent_id ? '<span class="account-sub">Sub-account</span>' : ''}
             </td>
             <td>
                 <span class="account-type ${typeClass}">${this.formatAccountType(account.type)}</span>
             </td>
-            <td class="account-description">${account.description || '-'}</td>
             <td class="${balanceClass} font-medium account-balance">
                 ${this.formatCurrency(account.balance)}
             </td>
@@ -342,11 +249,10 @@ class AccountsPage {
             title.textContent = 'Edit Account';
             this.currentEditId = account.id;
             
-            document.getElementById('account-code').value = account.code;
             document.getElementById('account-name').value = account.name;
             document.getElementById('account-type').value = account.type;
+            document.getElementById('account-balance').value = Math.abs(account.balance);
             document.getElementById('account-description').value = account.description || '';
-            document.getElementById('account-parent').value = account.parent_id || '';
         } else {
             // Add mode
             title.textContent = 'Add New Account';
@@ -403,12 +309,20 @@ class AccountsPage {
      * Save account
      */
     async saveAccount() {
+        const accountType = document.getElementById('account-type').value;
+        const balance = parseFloat(document.getElementById('account-balance').value) || 0;
+        
+        // Adjust balance based on account type
+        let adjustedBalance = balance;
+        if (accountType === 'liability' || accountType === 'expense') {
+            adjustedBalance = -balance;
+        }
+        
         const formData = {
-            code: document.getElementById('account-code').value,
             name: document.getElementById('account-name').value,
-            type: document.getElementById('account-type').value,
-            description: document.getElementById('account-description').value,
-            parent_id: document.getElementById('account-parent').value || null
+            type: accountType,
+            balance: adjustedBalance,
+            description: document.getElementById('account-description').value || ''
         };
 
         try {

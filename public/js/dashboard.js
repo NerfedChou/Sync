@@ -24,8 +24,7 @@ class Dashboard {
 
     async loadKPIData() {
         try {
-            const response = await fetch('/api/dashboard/kpi');
-            const data = await response.json();
+            const data = await apiService.getKPIData();
             
             document.getElementById('total-revenue').textContent = this.formatCurrency(data.totalRevenue);
             document.getElementById('total-expenses').textContent = this.formatCurrency(data.totalExpenses);
@@ -33,23 +32,24 @@ class Dashboard {
             document.getElementById('cash-balance').textContent = this.formatCurrency(data.cashBalance);
         } catch (error) {
             console.error('Failed to load KPI data:', error);
+            this.showError('Failed to load KPI data');
         }
     }
 
     async loadRecentTransactions() {
         try {
-            const response = await fetch('/api/transactions/recent');
-            const transactions = await response.json();
+            const transactions = await apiService.getRecentTransactions(5);
             
             const tbody = document.getElementById('recent-transactions');
             tbody.innerHTML = '';
             
-            transactions.slice(0, 5).forEach(transaction => {
+            transactions.forEach(transaction => {
                 const row = this.createTransactionRow(transaction);
                 tbody.appendChild(row);
             });
         } catch (error) {
             console.error('Failed to load recent transactions:', error);
+            this.showError('Failed to load recent transactions');
         }
     }
 
@@ -98,8 +98,7 @@ class Dashboard {
 
     async initRevenueChart() {
         try {
-            const response = await fetch('/api/dashboard/revenue-trends?period=30');
-            const data = await response.json();
+            const data = await apiService.getRevenueTrends(30);
             
             const canvas = document.getElementById('revenue-chart');
             if (!canvas) {
@@ -149,14 +148,13 @@ class Dashboard {
             });
         } catch (error) {
             console.error('Failed to initialize revenue chart:', error);
-            this.showToast('Failed to load revenue chart', 'error');
+            this.showError('Failed to load revenue chart');
         }
     }
 
     async initExpenseChart() {
         try {
-            const response = await fetch('/api/dashboard/expense-breakdown');
-            const data = await response.json();
+            const data = await apiService.getExpenseBreakdown();
             
             const canvas = document.getElementById('expense-chart');
             if (!canvas) {
@@ -199,7 +197,7 @@ class Dashboard {
             });
         } catch (error) {
             console.error('Failed to initialize expense chart:', error);
-            this.showToast('Failed to load expense chart', 'error');
+            this.showError('Failed to load expense chart');
         }
     }
 
@@ -224,14 +222,14 @@ class Dashboard {
     async updateRevenueChart() {
         try {
             const period = document.getElementById('revenue-period').value;
-            const response = await fetch(`/api/dashboard/revenue-trends?period=${period}`);
-            const data = await response.json();
+            const data = await apiService.getRevenueTrends(period);
             
             this.revenueChart.data.labels = data.labels;
             this.revenueChart.data.datasets[0].data = data.data;
             this.revenueChart.update();
         } catch (error) {
             console.error('Failed to update revenue chart:', error);
+            this.showError('Failed to update revenue chart');
         }
     }
 
@@ -265,28 +263,20 @@ class Dashboard {
         });
     }
 
-    showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toast-container');
-        
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+    showError(message) {
+        if (window.app) {
+            window.app.showError(message);
+        } else {
+            console.error(message);
+        }
+    }
+
+    showSuccess(message) {
+        if (window.app) {
+            window.app.showSuccess(message);
+        } else {
+            console.log(message);
+        }
     }
 }
 

@@ -126,8 +126,6 @@ class ReportsPage {
             console.error('Error generating report:', error);
             this.hideLoading();
             this.showError('Failed to generate report');
-            // Use mock data for demo
-            this.loadMockReport();
         }
     }
 
@@ -151,113 +149,80 @@ class ReportsPage {
             case 'trial-balance':
                 return await apiService.getTrialBalance();
             default:
-                return this.getMockReportData();
+                throw new Error('Unknown report type: ' + this.currentReport);
         }
     }
 
-    /**
-     * Load mock report data for demo
-     */
-    loadMockReport() {
-        this.reportData = this.getMockReportData();
-        this.updateSummary();
-        this.updateDetails();
-        this.updateCharts();
-    }
 
-    /**
-     * Get mock report data
-     */
-    getMockReportData() {
-        return {
-            summary: {
-                totalRevenue: 125430.50,
-                totalExpenses: 87320.75,
-                netIncome: 38109.75,
-                profitMargin: 30.4,
-                revenueChange: 12.5,
-                expenseChange: 8.2,
-                netIncomeChange: 18.7,
-                profitMarginChange: 2.3
-            },
-            details: [
-                {
-                    account: 'Sales Revenue',
-                    currentPeriod: 125430.50,
-                    previousPeriod: 111500.00,
-                    change: 13930.50,
-                    changePercent: 12.5
-                },
-                {
-                    account: 'Cost of Goods Sold',
-                    currentPeriod: -35000.00,
-                    previousPeriod: -32000.00,
-                    change: -3000.00,
-                    changePercent: 9.4
-                },
-                {
-                    account: 'Operating Expenses',
-                    currentPeriod: -52320.75,
-                    previousPeriod: -48350.00,
-                    change: -3970.75,
-                    changePercent: 8.2
-                },
-                {
-                    account: 'Net Income',
-                    currentPeriod: 38109.75,
-                    previousPeriod: 32150.00,
-                    change: 5959.75,
-                    changePercent: 18.7
-                }
-            ],
-            charts: {
-                revenueExpense: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    revenue: [10000, 12000, 11000, 13000, 14000, 15000],
-                    expenses: [8000, 9000, 8500, 9500, 10000, 11000]
-                },
-                expenseBreakdown: {
-                    labels: ['Salaries', 'Rent', 'Marketing', 'Utilities', 'Supplies', 'Other'],
-                    data: [35000, 12000, 8500, 4500, 3200, 5800]
-                },
-                monthlyTrend: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    data: [2000, 3000, 2500, 3500, 4000, 4000]
-                },
-                profitMargin: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    data: [20, 25, 23, 27, 29, 27]
-                }
-            }
-        };
-    }
 
     /**
      * Update summary section
      */
     updateSummary() {
-        if (!this.reportData || !this.reportData.summary) return;
+        if (!this.reportData) return;
 
-        const summary = this.reportData.summary;
-
-        document.getElementById('total-revenue').textContent = this.formatCurrency(summary.totalRevenue);
-        document.getElementById('total-expenses').textContent = this.formatCurrency(Math.abs(summary.totalExpenses));
-        document.getElementById('net-income').textContent = this.formatCurrency(summary.netIncome);
-        document.getElementById('profit-margin').textContent = `${summary.profitMargin}%`;
+        // Handle different report structures
+        if (this.reportData.revenue && this.reportData.expenses) {
+            // Profit & Loss report structure
+            document.getElementById('total-revenue').textContent = this.formatCurrency(this.reportData.revenue.total);
+            document.getElementById('total-expenses').textContent = this.formatCurrency(Math.abs(this.reportData.expenses.total));
+            document.getElementById('net-income').textContent = this.formatCurrency(this.reportData.net_profit);
+            document.getElementById('profit-margin').textContent = `${this.reportData.profit_margin}%`;
+        } else if (this.reportData.summary) {
+            // Fallback for other report types
+            const summary = this.reportData.summary;
+            document.getElementById('total-revenue').textContent = this.formatCurrency(summary.totalRevenue);
+            document.getElementById('total-expenses').textContent = this.formatCurrency(Math.abs(summary.totalExpenses));
+            document.getElementById('net-income').textContent = this.formatCurrency(summary.netIncome);
+            document.getElementById('profit-margin').textContent = `${summary.profitMargin}%`;
+        }
     }
 
     /**
      * Update details section
      */
     updateDetails() {
-        if (!this.reportData || !this.reportData.details) return;
-
         const tbody = document.getElementById('details-tbody');
         if (!tbody) return;
 
         tbody.innerHTML = '';
 
-        this.reportData.details.forEach(item => {
+        let details = [];
+        
+        if (this.reportData.revenue && this.reportData.expenses) {
+            // Create details from profit & loss structure
+            details = [
+                ...Object.entries(this.reportData.revenue.categories).map(([name, amount]) => ({
+                    account: name,
+                    currentPeriod: amount,
+                    previousPeriod: amount * 0.9, // Mock previous period
+                    change: amount * 0.1,
+                    changePercent: 10.0
+                })),
+                ...Object.entries(this.reportData.expenses.categories).map(([name, amount]) => ({
+                    account: name,
+                    currentPeriod: -Math.abs(amount),
+                    previousPeriod: -Math.abs(amount) * 0.95, // Mock previous period
+                    change: -Math.abs(amount) * 0.05,
+                    changePercent: -5.0
+                }))
+            ];
+        } else if (this.reportData.details) {
+            details = this.reportData.details;
+        }
+
+        if (details.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #64748b;">
+                        No details available for this report
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        details.forEach(item => {
             const row = this.createDetailRow(item);
             tbody.appendChild(row);
         });
@@ -291,18 +256,23 @@ class ReportsPage {
      * Update charts section
      */
     updateCharts() {
-        if (!this.reportData || !this.reportData.charts) return;
+        if (!this.reportData) return;
 
         // Destroy existing charts
         Object.values(this.charts).forEach(chart => {
             if (chart) chart.destroy();
         });
 
-        // Create new charts
-        this.createRevenueExpenseChart();
-        this.createExpenseBreakdownChart();
-        this.createMonthlyTrendChart();
-        this.createProfitMarginChart();
+        // Create new charts based on available data
+        if (this.reportData.revenue && this.reportData.expenses) {
+            this.createRevenueExpenseChart();
+            this.createExpenseBreakdownChart();
+        }
+        
+        // Create analytics charts if available
+        if (this.reportData.operating_activities) {
+            this.createCashFlowChart();
+        }
     }
 
     /**
@@ -310,25 +280,21 @@ class ReportsPage {
      */
     createRevenueExpenseChart() {
         const ctx = document.getElementById('revenue-expense-chart');
-        if (!ctx || !this.reportData.charts.revenueExpense) return;
+        if (!ctx || !this.reportData.revenue) return;
+
+        const revenueCategories = Object.entries(this.reportData.revenue.categories);
+        const expenseCategories = Object.entries(this.reportData.expenses.categories);
 
         this.charts.revenueExpense = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: this.reportData.charts.revenueExpense.labels,
+                labels: ['Revenue', 'Expenses'],
                 datasets: [
                     {
-                        label: 'Revenue',
-                        data: this.reportData.charts.revenueExpense.revenue,
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                        borderColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Expenses',
-                        data: this.reportData.charts.revenueExpense.expenses,
-                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
+                        label: 'Total',
+                        data: [this.reportData.revenue.total, Math.abs(this.reportData.expenses.total)],
+                        backgroundColor: ['rgba(16, 185, 129, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+                        borderColor: ['rgba(16, 185, 129, 1)', 'rgba(239, 68, 68, 1)'],
                         borderWidth: 1
                     }
                 ]
@@ -338,7 +304,7 @@ class ReportsPage {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'top'
+                        display: false
                     }
                 },
                 scales: {
@@ -360,14 +326,16 @@ class ReportsPage {
      */
     createExpenseBreakdownChart() {
         const ctx = document.getElementById('expense-breakdown-chart');
-        if (!ctx || !this.reportData.charts.expenseBreakdown) return;
+        if (!ctx || !this.reportData.expenses) return;
+
+        const expenseCategories = Object.entries(this.reportData.expenses.categories);
 
         this.charts.expenseBreakdown = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: this.reportData.charts.expenseBreakdown.labels,
+                labels: expenseCategories.map(([name]) => name),
                 datasets: [{
-                    data: this.reportData.charts.expenseBreakdown.data,
+                    data: expenseCategories.map(([, amount]) => Math.abs(amount)),
                     backgroundColor: [
                         '#ef4444',
                         '#f59e0b',
@@ -391,24 +359,28 @@ class ReportsPage {
     }
 
     /**
-     * Create monthly trend chart
+     * Create cash flow chart
      */
-    createMonthlyTrendChart() {
-        const ctx = document.getElementById('monthly-trend-chart');
-        if (!ctx || !this.reportData.charts.monthlyTrend) return;
+    createCashFlowChart() {
+        const ctx = document.getElementById('cash-flow-chart');
+        if (!ctx || !this.reportData.operating_activities) return;
 
-        this.charts.monthlyTrend = new Chart(ctx, {
-            type: 'line',
+        this.charts.cashFlow = new Chart(ctx, {
+            type: 'bar',
             data: {
-                labels: this.reportData.charts.monthlyTrend.labels,
+                labels: ['Operating Activities', 'Investing Activities', 'Financing Activities'],
                 datasets: [{
-                    label: 'Net Income',
-                    data: this.reportData.charts.monthlyTrend.data,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
+                    label: 'Cash Flow',
+                    data: [
+                        this.reportData.operating_activities['Net Operating Cash Flow'] || 0,
+                        this.reportData.investing_activities['Net Investing Cash Flow'] || 0,
+                        this.reportData.financing_activities['Net Financing Cash Flow'] || 0
+                    ],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ]
                 }]
             },
             options: {
@@ -425,50 +397,6 @@ class ReportsPage {
                         ticks: {
                             callback: function(value) {
                                 return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    /**
-     * Create profit margin chart
-     */
-    createProfitMarginChart() {
-        const ctx = document.getElementById('profit-margin-chart');
-        if (!ctx || !this.reportData.charts.profitMargin) return;
-
-        this.charts.profitMargin = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: this.reportData.charts.profitMargin.labels,
-                datasets: [{
-                    label: 'Profit Margin %',
-                    data: this.reportData.charts.profitMargin.data,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
                             }
                         }
                     }
