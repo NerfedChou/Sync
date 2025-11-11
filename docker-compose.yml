@@ -1,0 +1,70 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: accounting_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: accounting_system
+      MYSQL_USER: accounting_user
+      MYSQL_PASSWORD: accounting_pass_123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - accounting_network
+
+  # PHP Application
+  php:
+    image: php:8.3-fpm-alpine
+    container_name: accounting_php
+    restart: unless-stopped
+    volumes:
+      - ./php/src:/var/www/html/api
+    working_dir: /var/www/html/api
+    depends_on:
+      - mysql
+    networks:
+      - accounting_network
+
+  # Nginx Web Server (serves both API and static frontend)
+  nginx:
+    image: nginx:alpine
+    container_name: accounting_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./public:/var/www/html
+      - ./php/src:/var/www/html/api
+    depends_on:
+      - php
+    networks:
+      - accounting_network
+
+  # phpMyAdmin for Database Management
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: accounting_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: accounting_user
+      PMA_PASSWORD: accounting_pass_123
+    depends_on:
+      - mysql
+    networks:
+      - accounting_network
+
+volumes:
+  mysql_data:
+
+networks:
+  accounting_network:
+    driver: bridge
