@@ -188,6 +188,9 @@ function routeToController($resource, $action, $id) {
         case 'login':
             $file = $controllerPath . 'login.php';
             break;
+        case 'liability':
+            $file = $controllerPath . 'liability.php';
+            break;
         case 'external-investment':
             $file = $controllerPath . 'external-investment.php';
             break;

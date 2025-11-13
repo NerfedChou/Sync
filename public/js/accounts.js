@@ -188,6 +188,13 @@ class AccountsPage {
             }
         });
 
+        // Calculate equity using accounting equation: Equity = Assets - Liabilities
+        // This ensures equity is calculated correctly even if no equity accounts exist
+        const calculatedEquity = totalAssets - totalLiabilities;
+        
+        // Use the larger of explicit equity accounts or calculated equity
+        totalEquity = Math.max(totalEquity, calculatedEquity);
+
         return {
             totalAssets,
             totalLiabilities,

@@ -368,6 +368,10 @@ class ApiService {
         return this.post('/transactions/external-investment', investmentData);
     }
 
+    async createLiability(liabilityData) {
+        return this.post('/transactions/liability', liabilityData);
+    }
+
     async createMicroTransaction(transactionData) {
         return this.post('/transactions/micro-transaction', transactionData);
     }

@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS transaction_types (
 INSERT IGNORE INTO transaction_types (type_name, description) VALUES
 ('external_investment', 'External investment from investors'),
 ('micro_transaction', 'Micro transaction between accounts'),
+('liability_created', 'Liability creation with corresponding asset'),
+('equipment_financing', 'Equipment/vehicle financing'),
+('credit_line', 'Credit line establishment'),
 ('profit_distribution', 'Profit distribution to investors'),
 ('investor_exit', 'Investor buyout/exit'),
 ('investor_asset_protection', 'Investor asset protection'),
