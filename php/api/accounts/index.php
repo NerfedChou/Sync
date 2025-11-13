@@ -31,14 +31,27 @@ try {
     
     $accounts = $db->fetchAll($sql, [$company_id]);
     
-    // Simple format for frontend
+    // Simple format for frontend with INTUITIVE EXPENSE DISPLAY
     $formattedAccounts = array_map(function($account) {
+        $balance = (float)$account['balance'];
+        $accountType = strtolower($account['type']);
+        
+        // For expense accounts, keep negative balance for intuitive display
+        // This shows "how much needs to be paid" rather than confusing accounting
+        if ($accountType === 'expense') {
+            // Keep the negative balance as-is for intuitive display
+            // -$100 means "$100 still needs to be paid"
+            $displayBalance = $balance;
+        } else {
+            $displayBalance = $balance;
+        }
+        
         return [
             'id' => (int)$account['id'],
             'Account Name' => $account['name'],
             'code' => $account['code'],
-            'Type' => strtolower($account['type']),
-            'Balance' => (float)$account['balance'],
+            'Type' => $accountType,
+            'Balance' => $displayBalance,
             'Status' => $account['status'] ? 'active' : 'inactive',
             'description' => $account['description'] ?? ''
         ];

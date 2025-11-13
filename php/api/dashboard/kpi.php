@@ -45,20 +45,6 @@ try {
         AND (account_name LIKE '%Cash%' OR account_name LIKE '%Bank%' OR account_name LIKE '%Checking%' OR account_name LIKE '%Savings%')
     ";
     
-    $expenseSql = "
-        SELECT COALESCE(SUM(amount), 0) as totalExpenses
-        FROM transactions_simple 
-        WHERE company_id = ? 
-        AND (category LIKE '%Expense%' OR category LIKE '%Cost%' OR account LIKE '%Expense%')
-    ";
-    
-    $cashSql = "
-        SELECT COALESCE(SUM(opening_balance), 0) as cashBalance
-        FROM accounts 
-        WHERE company_id = ? AND is_active = 1 
-        AND (account_name LIKE '%Cash%' OR account_name LIKE '%Bank%' OR account_name LIKE '%Checking%' OR account_name LIKE '%Savings%')
-    ";
-    
     $revenueResult = $db->fetchOne($revenueSql, [$company_id]);
     $expenseResult = $db->fetchOne($expenseSql, [$company_id]);
     $cashResult = $db->fetchOne($cashSql, [$company_id]);
@@ -81,6 +67,6 @@ try {
     
 } catch (Exception $e) {
     error_log("Dashboard KPI endpoint error: " . $e->getMessage());
-    Response::serverError("Failed to retrieve KPI data");
+    Response::serverError("Failed to retrieve KPI data", $e);
 }
 ?>

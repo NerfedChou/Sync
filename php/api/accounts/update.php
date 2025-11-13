@@ -9,12 +9,13 @@ try {
         Response::error("Method not allowed", 405);
     }
     
-    // Get account ID from URL
-    $urlParts = explode('/', $_SERVER['REQUEST_URI']);
+    // Get account ID from URL - remove query parameters first
+    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $urlParts = explode('/', $urlPath);
     $accountId = end($urlParts);
     
     if (!is_numeric($accountId)) {
-        Response::error("Invalid account ID", 400);
+        Response::error("Invalid account ID: $accountId", 400);
     }
     
     // Get JSON input
@@ -74,10 +75,21 @@ try {
     }
     
     if (isset($input['balance'])) {
+        $balance = (float)$input['balance'];
+        
+        // INTUITIVE EXPENSE TRACKING: For expense accounts, store negative balance
+        // User enters positive budget amount (e.g., 10), but we store as negative (-10)
+        $accountType = strtolower($existingAccount['account_type'] ?? '');
+        error_log("Account type: $accountType, Original balance: $balance");
+        if ($accountType === 'expense' && $balance > 0) {
+            $balance = -$balance;
+            error_log("Updated balance for expense account: $balance");
+        }
+        
         $updateFields[] = "current_balance = ?";
         $updateFields[] = "opening_balance = ?";
-        $params[] = (float)$input['balance'];
-        $params[] = (float)$input['balance'];
+        $params[] = $balance;
+        $params[] = $balance;
     }
     
     if (isset($input['is_active'])) {

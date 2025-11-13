@@ -364,18 +364,18 @@ class AccountsPage {
     /**
      * Show account modal
      */
-    showAccountModal(account = null) {
+        showAccountModal(account = null, readOnly = false) {
         const modal = document.getElementById('account-modal');
         const overlay = document.getElementById('modal-overlay');
         const title = document.getElementById('modal-title');
         const form = document.getElementById('account-form');
-
+        
         if (!modal || !overlay || !title || !form) return;
-
+        
         // Reset form
         form.reset();
         this.currentEditId = null;
-
+        
         if (account) {
             // Edit mode
             this.currentEditId = account.id;
@@ -389,6 +389,38 @@ class AccountsPage {
             document.getElementById('account-type').value = account.Type;
             document.getElementById('account-balance').value = Math.abs(account.Balance);
             document.getElementById('account-description').value = account.description || '';
+            
+            // Make fields read-only if account has transaction history
+            const accountAge = this.calculateAccountAge(account);
+            const hasRecentTransactions = accountAge <= 24; // hours
+            
+            if (hasRecentTransactions) {
+                // Account has recent activity - make it read-only
+                document.getElementById('account-name').readOnly = true;
+                document.getElementById('account-type').readOnly = true;
+                document.getElementById('account-balance').readOnly = true;
+                document.getElementById('account-description').readOnly = true;
+                
+                // Hide save button for read-only accounts
+                const saveBtn = document.getElementById('save-account-btn');
+                if (saveBtn) {
+                    saveBtn.style.display = 'none';
+                }
+                
+                this.showInfo('This account has recent transactions and cannot be edited. Only balance can be viewed.');
+            } else {
+                // Account is old enough - allow full editing
+                document.getElementById('account-name').readOnly = false;
+                document.getElementById('account-type').readOnly = false;
+                document.getElementById('account-balance').readOnly = false;
+                document.getElementById('account-description').readOnly = false;
+                
+                // Show save button for editable accounts
+                const saveBtn = document.getElementById('save-account-btn');
+                if (saveBtn) {
+                    saveBtn.style.display = 'block';
+                }
+            }
         } else {
             // Add mode
             title.textContent = 'Add Account';
@@ -397,7 +429,7 @@ class AccountsPage {
                 saveBtn.textContent = 'Add Account';
             }
         }
-
+        
         modal.classList.add('modal--active');
         overlay.classList.add('modal--active');
         document.body.style.overflow = 'hidden';

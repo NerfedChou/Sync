@@ -19,43 +19,39 @@ try {
     $endDate = date('Y-m-d');
     $startDate = date('Y-m-d', strtotime("-{$period} days"));
     
-    // Query for revenue data from simplified transactions
+    // Query for revenue data from main schema
     $revenueSql = "
         SELECT 
-            DATE_FORMAT(date, '%b %d') as label,
-            SUM(CASE 
-                WHEN status = 'completed' 
-                AND (category LIKE '%Revenue%' OR account LIKE '%Revenue%') 
-                THEN amount ELSE 0 END
-            ) as revenue
-        FROM transactions_simple 
-        WHERE company_id = ? 
-            AND date BETWEEN ? AND ?
-            AND status = 'completed'
-            AND (category LIKE '%Revenue%' OR account LIKE '%Revenue%')
-        GROUP BY DATE_FORMAT(date, '%b %d'), date
-        ORDER BY date
+            DATE_FORMAT(t.transaction_date, '%b %d') as label,
+            SUM(tl.credit_amount) as revenue
+        FROM transactions t
+        JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ? 
+            AND t.transaction_date BETWEEN ? AND ?
+            AND t.status = 'posted'
+            AND a.account_type = 'REVENUE'
+        GROUP BY DATE_FORMAT(t.transaction_date, '%b %d'), t.transaction_date
+        ORDER BY t.transaction_date
         LIMIT 30
     ";
     
     $revenueResults = $db->fetchAll($revenueSql, [$company_id, $startDate, $endDate]);
     
-    // Query for expense data from simplified transactions
+    // Query for expense data from main schema
     $expenseSql = "
         SELECT 
-            DATE_FORMAT(date, '%b %d') as label,
-            SUM(CASE 
-                WHEN status = 'completed' 
-                AND (category LIKE '%Expense%' OR account LIKE '%Expense%') 
-                THEN amount ELSE 0 END
-            ) as expenses
-        FROM transactions_simple 
-        WHERE company_id = ? 
-            AND date BETWEEN ? AND ?
-            AND status = 'completed'
-            AND (category LIKE '%Expense%' OR account LIKE '%Expense%')
-        GROUP BY DATE_FORMAT(date, '%b %d'), date
-        ORDER BY date
+            DATE_FORMAT(t.transaction_date, '%b %d') as label,
+            SUM(tl.debit_amount) as expenses
+        FROM transactions t
+        JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ? 
+            AND t.transaction_date BETWEEN ? AND ?
+            AND t.status = 'posted'
+            AND a.account_type = 'EXPENSE'
+        GROUP BY DATE_FORMAT(t.transaction_date, '%b %d'), t.transaction_date
+        ORDER BY t.transaction_date
         LIMIT 30
     ";
     
@@ -114,6 +110,6 @@ try {
     
 } catch (Exception $e) {
     error_log("Profit and Loss endpoint error: " . $e->getMessage());
-    Response::serverError("Failed to retrieve Profit and Loss data");
+    Response::serverError("Failed to retrieve Profit and Loss data", $e);
 }
 ?>

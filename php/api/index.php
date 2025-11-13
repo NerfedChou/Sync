@@ -60,6 +60,27 @@ try {
         }
     }
     
+    // Handle REST-style routing for transactions
+    if ($resource === 'transactions' && isset($segments[1])) {
+        if (is_numeric($segments[1])) {
+            // REST style: PUT /transactions/1 or DELETE /transactions/1
+            $id = $segments[1];
+            $method = $_SERVER['REQUEST_METHOD'];
+            
+            if ($method === 'PUT') {
+                $action = 'update';
+            } elseif ($method === 'DELETE') {
+                $action = 'delete';
+            } else {
+                $action = 'index';
+            }
+        } else {
+            // Handle special transaction endpoints like external-investment, micro-transaction
+            $action = $segments[1];
+            $resource = 'transactions';
+        }
+    }
+    
     // Handle POST requests for creation
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'index') {
         $action = 'create';
@@ -166,6 +187,21 @@ function routeToController($resource, $action, $id) {
             break;
         case 'login':
             $file = $controllerPath . 'login.php';
+            break;
+        case 'external-investment':
+            $file = $controllerPath . 'external-investment.php';
+            break;
+        case 'micro-transaction':
+            $file = $controllerPath . 'micro-transaction.php';
+            break;
+        case 'profit-distribution':
+            $file = $controllerPath . 'profit-distribution.php';
+            break;
+        case 'investor-exit':
+            $file = $controllerPath . 'investor-exit.php';
+            break;
+        case 'investor-asset-protection':
+            $file = $controllerPath . 'investor-asset-protection.php';
             break;
         default:
             Response::notFound("Action not found: {$action}");

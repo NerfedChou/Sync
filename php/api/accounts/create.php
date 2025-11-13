@@ -45,6 +45,13 @@ try {
         Response::error("Invalid account type", 400);
     }
     
+    // INTUITIVE EXPENSE TRACKING: For expense accounts, store negative balance
+    // User enters positive budget amount (e.g., 100), but we store as negative (-100)
+    // This way "paying" expenses moves balance toward zero (-100 → -50 → 0)
+    if ($type === 'expense' && $balance > 0) {
+        $balance = -$balance;
+    }
+    
     // Get database connection
     $db = new Database();
     $pdo = $db->getConnection();
@@ -75,13 +82,20 @@ try {
     // Get created account
     $createdAccount = $db->fetchOne("SELECT * FROM accounts WHERE account_id = ?", [$account_id]);
     
-    // Format response
+    // Format response - for expense accounts, show intuitive display
+    $displayBalance = (float)$createdAccount['current_balance'];
+    if ($type === 'expense') {
+        // For expense accounts, show as "budget to be used" 
+        // If stored as -100, display as -$100 (meaning $100 to pay off)
+        $displayBalance = $displayBalance; // Keep negative for intuitive display
+    }
+    
     $accountData = [
         'id' => (int)$createdAccount['account_id'],
         'Account Name' => $createdAccount['account_name'],
         'code' => $createdAccount['account_code'],
         'Type' => strtolower($createdAccount['account_type']),
-        'Balance' => (float)$createdAccount['current_balance'],
+        'Balance' => $displayBalance,
         'Status' => $createdAccount['is_active'] ? 'active' : 'inactive',
         'description' => $createdAccount['description'] ?? ''
     ];

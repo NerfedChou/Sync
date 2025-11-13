@@ -13,9 +13,9 @@ function getDateFormat($period) {
     } elseif ($period <= 30) {
         return '%b %d'; // Month day for month
     } elseif ($period <= 90) {
-        return '%b %d'; // Month day for quarter
+        return 'Week %v'; // Week number for quarter
     } else {
-        return '%b %d'; // Month day for year
+        return '%b'; // Month name for year
     }
 }
 
@@ -24,15 +24,15 @@ function getDateFormat($period) {
  */
 function getGroupBy($period) {
     if ($period <= 1) {
-        return 'DATE_FORMAT(date, "%Y-%m-%d %H")'; // Hourly
+        return 'DATE_FORMAT(t.transaction_date, "%Y-%m-%d %H")'; // Hourly
     } elseif ($period <= 7) {
-        return 'DATE(date)'; // Daily for week
+        return 'DATE(t.transaction_date)'; // Daily for week
     } elseif ($period <= 30) {
-        return 'DATE(date)'; // Daily for month
+        return 'DATE(t.transaction_date)'; // Daily for month
     } elseif ($period <= 90) {
-        return 'WEEK(date)'; // Weekly for quarter
+        return 'YEARWEEK(t.transaction_date)'; // Weekly for quarter
     } else {
-        return 'MONTH(date)'; // Monthly for year
+        return 'MONTH(t.transaction_date)'; // Monthly for year
     }
 }
 
@@ -79,8 +79,8 @@ try {
             AND t.transaction_date BETWEEN ? AND ?
             AND t.status = 'posted'
             AND a.account_type = 'REVENUE'
-        GROUP BY {$groupBy}, t.transaction_date
-        ORDER BY t.transaction_date
+        GROUP BY label
+        ORDER BY MIN(t.transaction_date)
         LIMIT 30
     ";
     
@@ -111,6 +111,6 @@ try {
     
 } catch (Exception $e) {
     error_log("Revenue trends endpoint error: " . $e->getMessage());
-    Response::serverError("Failed to retrieve revenue trends");
+    Response::serverError("Failed to retrieve revenue trends", $e);
 }
 ?>

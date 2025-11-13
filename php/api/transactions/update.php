@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/response.php';
@@ -30,7 +29,7 @@ try {
     $pdo = $db->getConnection();
     
     // Check if transaction exists
-    $existingTransaction = $db->fetchOne("SELECT * FROM transactions WHERE id = ?", [$transactionId]);
+    $existingTransaction = $db->fetchOne("SELECT * FROM transactions WHERE transaction_id = ?", [$transactionId]);
     if (!$existingTransaction) {
         Response::notFound("Transaction not found");
     }
@@ -92,43 +91,13 @@ try {
         }
         
         if (isset($input['amount'])) {
-            $updateFields[] = "amount = ?";
+            $updateFields[] = "total_amount = ?";
             $params[] = (float)$input['amount'];
-        }
-        
-        if (isset($input['type'])) {
-            $updateFields[] = "type = ?";
-            $params[] = Validation::sanitize($input['type']);
-        }
-        
-        if (isset($input['category'])) {
-            $updateFields[] = "category = ?";
-            $params[] = Validation::sanitize($input['category']);
-        }
-        
-        if (isset($input['notes'])) {
-            $updateFields[] = "notes = ?";
-            $params[] = Validation::sanitize($input['notes']);
         }
         
         if (isset($input['status'])) {
             $updateFields[] = "status = ?";
             $params[] = Validation::sanitize($input['status']);
-        }
-        
-        if (isset($input['account_id'])) {
-            // Verify new account exists
-            $accountCheck = $db->fetchOne(
-                "SELECT id, account_name FROM accounts WHERE id = ? AND is_active = 1",
-                [(int)$input['account_id']]
-            );
-            
-            if (!$accountCheck) {
-                Response::error("Account not found", 404);
-            }
-            
-            $updateFields[] = "account_id = ?";
-            $params[] = (int)$input['account_id'];
         }
         
         if (empty($updateFields)) {
@@ -139,29 +108,96 @@ try {
         $params[] = $transactionId;
         
         // Update transaction
-        $sql = "UPDATE transactions SET " . implode(", ", $updateFields) . ", updated_at = NOW() WHERE id = ?";
+        $sql = "UPDATE transactions SET " . implode(", ", $updateFields) . " WHERE transaction_id = ?";
         $db->query($sql, $params);
         
-        // Update transaction line if account or amount changed
-        if (isset($input['account_id']) || isset($input['amount']) || isset($input['type'])) {
-            // Get updated transaction for line update
-            $updatedTransaction = $db->fetchOne("SELECT * FROM transactions WHERE id = ?", [$transactionId]);
+        // Update transaction line if amount or type changed
+        if (isset($input['amount']) || isset($input['type']) || isset($input['account_id'])) {
+            // Get the account_id and type from input or existing transaction
+            $accountId = isset($input['account_id']) ? (int)$input['account_id'] : $existingTransaction['account_id'];
+            $type = isset($input['type']) ? $input['type'] : 'debit'; // Default to debit
+            $amount = isset($input['amount']) ? (float)$input['amount'] : (float)$existingTransaction['total_amount'];
+            $description = isset($input['description']) ? $input['description'] : $existingTransaction['description'];
             
+            // Verify account exists if provided
+            if (isset($input['account_id'])) {
+                $accountCheck = $db->fetchOne(
+                    "SELECT account_id, account_name, account_type FROM accounts WHERE account_id = ? AND company_id = ? AND is_active = 1",
+                    [$accountId, $input['company_id'] ?? 1]
+                );
+                
+                if (!$accountCheck) {
+                    Response::error("Account not found", 404);
+                }
+            }
+            
+            // Update transaction line
             $lineUpdateSql = "
                 UPDATE transaction_lines 
                 SET description = ?, debit_amount = ?, credit_amount = ?
                 WHERE transaction_id = ?
             ";
             
-            $debitAmount = $updatedTransaction['type'] === 'debit' ? $updatedTransaction['amount'] : 0;
-            $creditAmount = $updatedTransaction['type'] === 'credit' ? $updatedTransaction['amount'] : 0;
+            $debitAmount = $type === 'debit' ? $amount : 0;
+            $creditAmount = $type === 'credit' ? $amount : 0;
             
             $db->query($lineUpdateSql, [
-                $updatedTransaction['description'],
+                $description,
                 $debitAmount,
                 $creditAmount,
                 $transactionId
             ]);
+            
+            // Update account balance if amount or account changed
+            if (isset($input['amount']) || isset($input['account_id']) || isset($input['type'])) {
+                // Get original transaction line
+                $originalLine = $db->fetchOne(
+                    "SELECT debit_amount, credit_amount FROM transaction_lines WHERE transaction_id = ?",
+                    [$transactionId]
+                );
+                
+                if ($originalLine) {
+                    // Calculate original balance change
+                    $originalDebit = (float)$originalLine['debit_amount'];
+                    $originalCredit = (float)$originalLine['credit_amount'];
+                    $originalAmount = $originalDebit > 0 ? $originalDebit : $originalCredit;
+                    $originalType = $originalDebit > 0 ? 'debit' : 'credit';
+                    
+                    // Get account info for balance calculation
+                    $accountInfo = $db->fetchOne(
+                        "SELECT account_type FROM accounts WHERE account_id = ?",
+                        [$accountId]
+                    );
+                    
+                    if ($accountInfo) {
+                        $accountType = strtoupper($accountInfo['account_type']);
+                        
+                        // Reverse original balance change
+                        $originalBalanceChange = 0;
+                        if ($originalType === 'debit') {
+                            $originalBalanceChange = ($accountType === 'ASSET') ? $originalAmount : -$originalAmount;
+                        } else {
+                            $originalBalanceChange = ($accountType === 'ASSET') ? -$originalAmount : $originalAmount;
+                        }
+                        
+                        // Apply new balance change
+                        $newBalanceChange = 0;
+                        if ($type === 'debit') {
+                            $newBalanceChange = ($accountType === 'ASSET') ? $amount : -$amount;
+                        } else {
+                            $newBalanceChange = ($accountType === 'ASSET') ? -$amount : $amount;
+                        }
+                        
+                        $netChange = $newBalanceChange - $originalBalanceChange;
+                        
+                        // Update account balance
+                        $db->query(
+                            "UPDATE accounts SET current_balance = current_balance + ? WHERE account_id = ?",
+                            [$netChange, $accountId]
+                        );
+                    }
+                }
+            }
         }
         
         // Commit transaction
@@ -176,33 +212,34 @@ try {
     // Get updated transaction with account name
     $resultTransaction = $db->fetchOne("
         SELECT 
-            t.id,
+            t.transaction_id as id,
             t.transaction_date as date,
             t.description,
-            t.type,
-            t.amount,
+            t.total_amount as amount,
             t.status,
-            t.category,
-            t.notes,
+            tl.debit_amount,
+            tl.credit_amount,
             a.account_name as account,
-            a.id as account_id
+            a.account_id
         FROM transactions t
-        LEFT JOIN accounts a ON t.account_id = a.id
-        WHERE t.id = ?
+        LEFT JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        LEFT JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.transaction_id = ?
     ", [$transactionId]);
+    
+    // Determine transaction type from line amounts
+    $transactionType = $resultTransaction['debit_amount'] > 0 ? 'debit' : 'credit';
     
     // Format response
     $transactionData = [
         'id' => (int)$resultTransaction['id'],
         'date' => $resultTransaction['date'],
         'description' => $resultTransaction['description'],
-        'type' => $resultTransaction['type'],
+        'type' => $transactionType,
         'amount' => (float)$resultTransaction['amount'],
         'status' => $resultTransaction['status'],
-        'category' => $resultTransaction['category'] ?? 'Uncategorized',
         'account' => $resultTransaction['account'] ?? 'Unknown Account',
-        'account_id' => (int)$resultTransaction['account_id'],
-        'notes' => $resultTransaction['notes'] ?? ''
+        'account_id' => (int)$resultTransaction['account_id']
     ];
     
     Response::success($transactionData, "Transaction updated successfully");
