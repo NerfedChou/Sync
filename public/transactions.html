@@ -175,8 +175,11 @@
                     <button class="type-btn active" data-type="external-investment">
                         📥 External Investment
                     </button>
+                    <button class="type-btn" data-type="liability">
+                        🏦 Create Liability
+                    </button>
                     <button class="type-btn" data-type="micro-transaction">
-                        💸 Micro Transaction
+                        💸 Account Transfer
                     </button>
                 </div>
 
@@ -230,24 +233,24 @@
                     </div>
                 </div>
 
-                <!-- Micro Transaction Form -->
+                <!-- Account Transfer Form -->
                 <div id="micro-transaction-form" class="transaction-form">
                     <div class="form-section">
-                        <h6 class="mb-3">Transaction Accounts</h6>
+                        <h6 class="mb-3">💸 Account Transfer</h6>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="from-account">From Account (Asset) *</label>
+                                <label for="from-account">From Account (Debit) *</label>
                                 <select class="form-control" id="from-account" required>
-                                    <option value="">Select asset account...</option>
+                                    <option value="">Select account to debit...</option>
                                 </select>
-                                <small class="form-help">Money will be deducted from this account</small>
+                                <small class="form-help">Amount will be deducted from this account</small>
                             </div>
                             <div class="form-group">
-                                <label for="to-account">To Account (Liability/Expense) *</label>
+                                <label for="to-account">To Account (Credit) *</label>
                                 <select class="form-control" id="to-account" required>
-                                    <option value="">Select liability or expense account...</option>
+                                    <option value="">Select account to credit...</option>
                                 </select>
-                                <small class="form-help">Money will be credited to this account</small>
+                                <small class="form-help">Amount will be added to this account</small>
                             </div>
                         </div>
                     </div>
@@ -270,20 +273,153 @@
                         </div>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Accounting Rules:</strong> This follows standard double-entry accounting where:
-                        <ul class="mb-0 mt-2">
-                            <li>Asset accounts decrease (credit)</li>
-                            <li>Liability/Expense accounts increase (debit)</li>
-                        </ul>
+                    <div class="alert alert-warning alert-lg">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="font-size: 1rem; color: #92400e; display: block; margin-bottom: 0.75rem;">⚖️ Double-Entry Accounting Rules</strong>
+                                <div style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 1rem;">
+                                    <div style="display: grid; gap: 0.75rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #dc2626; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">DEBIT</span>
+                                            <div>
+                                                <strong style="color: #991b1b;">From Account:</strong>
+                                                <div style="color: #64748b; font-size: 0.875rem;">Amount is deducted from this account</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #16a34a; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">CREDIT</span>
+                                            <div>
+                                                <strong style="color: #166534;">To Account:</strong>
+                                                <div style="color: #64748b; font-size: 0.875rem;">Amount is added to this account</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; border-radius: 6px; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;">
+                                    <i class="fas fa-info-circle" style="color: #d97706;"></i>
+                                    <span style="color: #92400e; font-size: 0.875rem;">
+                                        <strong>Balance Impact:</strong> Debit decreases account balance, Credit increases account balance
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liability Creation Form -->
+                <div id="liability-form" class="transaction-form">
+                    <div class="form-section">
+                        <h6 class="mb-3">Liability Information</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="liability-name">Liability Name *</label>
+                                <input type="text" class="form-control" id="liability-name" required 
+                                       placeholder="e.g., John Doe, Farm Equipment, Office Tools">
+                                <small class="form-help">Name of the lender, equipment, or liability source</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="liability-type">Liability Type *</label>
+                                <select class="form-control" id="liability-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="loan">Loan</option>
+                                    <option value="equipment">Equipment</option>
+                                    <option value="tools">Tools</option>
+                                    <option value="vehicle">Vehicle</option>
+                                    <option value="credit_line">Credit Line</option>
+                                    <option value="mortgage">Mortgage</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <small class="form-help">Type of liability being created</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Financial Details</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="liability-amount">Amount ($) *</label>
+                                <input type="number" class="form-control" id="liability-amount" step="0.01" min="0.01" required>
+                                <small class="form-help">Total amount of the liability</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="liability-interest-rate">Interest Rate (%)</label>
+                                <input type="number" class="form-control" id="liability-interest-rate" step="0.01" min="0" value="0">
+                                <small class="form-help">Annual interest rate (optional)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Transaction Details</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="liability-date">Transaction Date *</label>
+                                <input type="date" class="form-control" id="liability-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="liability-company-id">Company ID *</label>
+                                <input type="number" class="form-control" id="liability-company-id" min="1" value="1" required>
+                                <small class="form-help">Company to associate this liability with</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="liability-description">Description *</label>
+                            <textarea class="form-control" id="liability-description" rows="3" required>Liability created with corresponding asset</textarea>
+                            <small class="form-help">Describe the purpose and details of this liability</small>
+                        </div>
+                    </div>
+
+                    <div class="existing-accounts-section" id="existing-accounts-section" style="display: none;">
+                        <h6 class="mb-3">Existing Accounts Found</h6>
+                        <div id="existing-accounts-list"></div>
+                    </div>
+
+                    <div class="alert alert-info alert-lg">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="font-size: 1rem; color: #1e40af; display: block; margin-bottom: 0.75rem;">✨ Automatic Account Creation</strong>
+                                <div style="background: rgba(59, 130, 246, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;">
+                                    <div style="display: grid; gap: 0.75rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #22c55e; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">ASSET</span>
+                                            <div>
+                                                <strong style="color: #166534;">"[Type] - [Name]"</strong>
+                                                <div style="color: #64748b; font-size: 0.875rem; font-style: italic;">e.g., "Loan - John Doe"</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">LIABILITY</span>
+                                            <div>
+                                                <strong style="color: #991b1b;">"[Name] - [Type]"</strong>
+                                                <div style="color: #64748b; font-size: 0.875rem; font-style: italic;">e.g., "John Doe - Loan"</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-sync-alt" style="color: #16a34a;"></i>
+                                    <span style="color: #166534; font-size: 0.875rem;">
+                                        <strong>Smart Reuse:</strong> If accounts already exist, they will be reused instead of creating duplicates.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancel-transaction-btn">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="submit-transaction">
-                        <i class="fas fa-save"></i> Create Transaction
+                    <button type="button" class="btn btn-outline-secondary" id="cancel-transaction-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="submit-transaction">
+                        <i class="fas fa-plus-circle"></i> Create Transaction
                     </button>
                 </div>
             </div>

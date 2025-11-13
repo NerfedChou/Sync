@@ -48,6 +48,47 @@ class Dashboard {
             document.getElementById('net-profit').textContent = this.formatCurrency(data.netProfit);
             document.getElementById('cash-balance').textContent = this.formatCurrency(data.cashBalance);
             
+            // Update additional KPIs if available
+            if (data.totalAssets !== undefined) {
+                const totalAssetsElement = document.getElementById('summary-total-assets');
+                if (totalAssetsElement) {
+                    totalAssetsElement.textContent = this.formatCurrency(data.totalAssets);
+                }
+            }
+            
+            if (data.totalLiabilities !== undefined) {
+                const totalLiabilitiesElement = document.getElementById('summary-total-liabilities');
+                if (totalLiabilitiesElement) {
+                    // Show liabilities as positive number for better UX
+                    totalLiabilitiesElement.textContent = this.formatCurrency(Math.abs(data.totalLiabilities));
+                }
+            }
+            
+            // Calculate equity on frontend if not provided by API
+            const calculatedEquity = (data.totalAssets || 0) - Math.abs(data.totalLiabilities || 0);
+            
+            // Set equity from API response or calculate if not available
+            const totalEquityElement = document.getElementById('summary-total-equity');
+            if (totalEquityElement) {
+                if (data.totalEquity !== undefined && data.totalEquity !== null) {
+                    console.log('Setting equity from API to:', data.totalEquity);
+                    // Small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        totalEquityElement.textContent = this.formatCurrency(data.totalEquity);
+                    }, 100);
+                } else {
+                    // Calculate equity as fallback: Assets - Liabilities
+                    const calculatedEquity = (data.totalAssets || 0) - Math.abs(data.totalLiabilities || 0);
+                    console.log('Setting calculated equity to:', calculatedEquity);
+                    // Small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        totalEquityElement.textContent = this.formatCurrency(calculatedEquity);
+                    }, 100);
+                }
+            } else {
+                console.log('No equity data in response');
+            }
+
             // Calculate and display additional metrics
             const profitMargin = data.totalRevenue > 0 ? (data.netProfit / data.totalRevenue * 100) : 0;
             const expenseRatio = data.totalRevenue > 0 ? (data.totalExpenses / data.totalRevenue * 100) : 0;
@@ -62,10 +103,9 @@ class Dashboard {
             if (expenseRatioElement) {
                 expenseRatioElement.textContent = expenseRatio.toFixed(1) + '%';
             }
-            
         } catch (error) {
             console.error('Failed to load KPI data:', error);
-            this.showError('Failed to load KPI data');
+            this.showToast('Failed to load KPI data', 'error');
         }
     }
 
@@ -106,6 +146,7 @@ class Dashboard {
                     summary.assetCount++;
                     break;
                 case 'LIABILITY':
+                    // Liabilities should be negative (debt), so add as-is
                     summary.totalLiabilities += balance;
                     summary.liabilityCount++;
                     break;

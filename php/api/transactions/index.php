@@ -52,7 +52,7 @@ try {
     $total = (int)$countResult['total'];
     $totalPages = ceil($total / $limit);
     
-    // Get transactions - show each transaction once with primary account details
+    // Get transactions with basic info first
     $sql = "
         SELECT 
             t.transaction_id as id,
@@ -61,28 +61,7 @@ try {
             t.description,
             t.total_amount as amount,
             t.status,
-            t.created_at,
-            -- Get the primary account (the one user specified in transaction)
-            (
-                SELECT a.account_name 
-                FROM transaction_lines tl 
-                JOIN accounts a ON tl.account_id = a.account_id 
-                WHERE tl.transaction_id = t.transaction_id 
-                LIMIT 1
-            ) as account,
-            -- Get debit/credit amounts for display
-            (
-                SELECT tl.debit_amount 
-                FROM transaction_lines tl 
-                WHERE tl.transaction_id = t.transaction_id AND tl.debit_amount > 0 
-                LIMIT 1
-            ) as debit_amount,
-            (
-                SELECT tl.credit_amount 
-                FROM transaction_lines tl 
-                WHERE tl.transaction_id = t.transaction_id AND tl.credit_amount > 0 
-                LIMIT 1
-            ) as credit_amount
+            t.created_at
         FROM transactions t
         {$whereClause}
         ORDER BY t.transaction_date DESC, t.created_at DESC
@@ -94,52 +73,19 @@ try {
     
     $transactions = $db->fetchAll($sql, $params);
     
-    // Format transactions for frontend with INTUITIVE EXPENSE DISPLAY
+        // Format transactions for frontend
     $formattedTransactions = [];
     foreach ($transactions as $transaction) {
-        $debitAmount = (float)$transaction['debit_amount'];
-        $creditAmount = (float)$transaction['credit_amount'];
-        
-        // Get account type for intuitive display
-        $accountType = '';
-        if (!empty($transaction['account'])) {
-            $accountInfo = $db->fetchOne(
-                "SELECT account_type FROM accounts WHERE account_name = ?",
-                [$transaction['account']]
-            );
-            $accountType = strtolower($accountInfo['account_type'] ?? '');
-        }
-        
-        // Determine amount and type with intuitive logic
-        if ($debitAmount > 0) {
-            $amount = $debitAmount;
-            $transactionType = 'Debit';
-            
-            // INTUITIVE: For expense accounts, show debits as positive payments
-            // This means "I paid $50 toward my expense"
-            if ($accountType === 'expense') {
-                $amount = $debitAmount; // Show as positive payment amount
-                $transactionType = 'Payment'; // More intuitive than "Debit"
-            }
-        } else {
-            $amount = $creditAmount; // Show credits as positive for consistency
-            $transactionType = 'Credit';
-            
-            // INTUITIVE: For expense accounts, show credits as "adding to expense"
-            if ($accountType === 'expense') {
-                $transactionType = 'Added'; // More intuitive than "Credit"
-            }
-        }
-        
         $formattedTransactions[] = [
             'id' => (int)$transaction['id'],
             'name' => $transaction['name'],
             'Date' => $transaction['date'],
             'Description' => $transaction['description'] ?? '',
-            'Account' => $transaction['account'] ?? '',
-            'Amount' => (float)$amount,
-            'Type' => $transactionType,
-            'Category' => 'General', // Default category since not in DB
+            'from_account_name' => '', // Will be populated separately if needed
+            'to_account_name' => '', // Will be populated separately if needed
+            'Amount' => (float)$transaction['amount'],
+            'Type' => 'Transaction',
+            'Category' => 'General',
             'Status' => $transaction['status'] ?? 'pending',
             'created_at' => $transaction['created_at']
         ];

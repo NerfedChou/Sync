@@ -141,6 +141,46 @@ class TransactionManager {
 
 
 
+        // Liability form auto-check existing accounts
+
+        const liabilityName = document.getElementById('liability-name');
+
+        const liabilityType = document.getElementById('liability-type');
+
+        
+
+        if (liabilityName) {
+
+            liabilityName.addEventListener('blur', () => {
+
+                if (liabilityName.value.trim() && liabilityType?.value) {
+
+                    setTimeout(() => this.checkExistingLiabilityAccounts(), 500);
+
+                }
+
+            });
+
+        }
+
+        
+
+        if (liabilityType) {
+
+            liabilityType.addEventListener('change', () => {
+
+                if (liabilityType.value && liabilityName?.value.trim()) {
+
+                    setTimeout(() => this.checkExistingLiabilityAccounts(), 500);
+
+                }
+
+            });
+
+        }
+
+
+
         // Modal close buttons
 
         const closeBtn = document.getElementById('close-transaction-modal-btn');
@@ -215,11 +255,15 @@ class TransactionManager {
 
         const microDate = document.getElementById('micro-date');
 
+        const liabilityDate = document.getElementById('liability-date');
+
         
 
         if (externalDate) externalDate.value = today;
 
         if (microDate) microDate.value = today;
+
+        if (liabilityDate) liabilityDate.value = today;
 
     }
 
@@ -305,7 +349,8 @@ class TransactionManager {
 
         accounts.forEach(account => {
 
-            const type = (account.account_type || '').toLowerCase();
+            // Handle both API response formats (account_type or Type)
+            const type = (account.account_type || account.Type || '').toLowerCase();
 
             if (type === 'asset') {
 
@@ -343,9 +388,9 @@ class TransactionManager {
 
                 const option = document.createElement('option');
 
-                option.value = account.account_id;
+                option.value = account.account_id || account.id;
 
-                option.textContent = `${account.account_name} (${parseFloat(account.current_balance || 0).toFixed(2)})`;
+                option.textContent = `${account.account_name || account['Account Name']} (${parseFloat(account.current_balance || account.Balance || 0).toFixed(2)})`;
 
                 fromSelect.appendChild(option);
 
@@ -371,9 +416,9 @@ class TransactionManager {
 
                 const option = document.createElement('option');
 
-                option.value = account.account_id;
+                option.value = account.account_id || account.id;
 
-                option.textContent = `${account.account_name} (${parseFloat(account.current_balance || 0).toFixed(2)})`;
+                option.textContent = `${account.account_name || account['Account Name']} (${parseFloat(account.current_balance || account.Balance || 0).toFixed(2)})`;
 
                 toSelect.appendChild(option);
 
@@ -515,6 +560,244 @@ class TransactionManager {
 
 
 
+    validateLiability() {
+
+        const liabilityName = document.getElementById('liability-name')?.value?.trim();
+
+        const liabilityType = document.getElementById('liability-type')?.value;
+
+        const amount = parseFloat(document.getElementById('liability-amount')?.value);
+
+        const interestRate = parseFloat(document.getElementById('liability-interest-rate')?.value) || 0;
+
+        const date = document.getElementById('liability-date')?.value;
+
+        const description = document.getElementById('liability-description')?.value?.trim();
+
+        const companyId = parseInt(document.getElementById('liability-company-id')?.value) || this.getCurrentCompanyId();
+
+
+
+        const errors = [];
+
+
+
+        if (!liabilityName) errors.push('Liability name is required');
+
+        if (!liabilityType) errors.push('Liability type is required');
+
+        if (!amount || amount <= 0) errors.push('Amount must be greater than 0');
+
+        if (!date) errors.push('Transaction date is required');
+
+        if (!description) errors.push('Description is required');
+
+        if (!companyId) errors.push('Company must be selected');
+
+
+
+        if (errors.length > 0) {
+
+            this.showAlert('danger', errors.join('<br>'));
+
+            return false;
+
+        }
+
+
+
+        return {
+
+            liability_name: liabilityName,
+
+            liability_type: liabilityType,
+
+            amount: amount,
+
+            interest_rate: interestRate,
+
+            date: date,
+
+            description: description,
+
+            company_id: companyId
+
+        };
+
+    }
+
+
+
+    async checkExistingLiabilityAccounts() {
+
+        const liabilityName = document.getElementById('liability-name')?.value?.trim();
+
+        const liabilityType = document.getElementById('liability-type')?.value;
+
+        const companyId = this.getCurrentCompanyId();
+
+
+
+        if (!liabilityName || !liabilityType) return;
+
+
+
+        try {
+
+            const response = await apiService.getAccounts({ company_id: companyId });
+
+            
+
+            if (response.success && response.data) {
+
+                const assetName = `${liabilityType.charAt(0).toUpperCase() + liabilityType.slice(1)} - ${liabilityName}`;
+
+                const liabilityNameFull = `${liabilityName} - ${liabilityType.charAt(0).toUpperCase() + liabilityType.slice(1)}`;
+
+                
+
+                const existingAssets = response.data.filter(account => 
+
+                    account['Account Name'].toLowerCase().includes(liabilityName.toLowerCase()) && 
+
+                    account.Type === 'asset'
+
+                );
+
+                
+
+                const existingLiabilities = response.data.filter(account => 
+
+                    account['Account Name'].toLowerCase().includes(liabilityName.toLowerCase()) && 
+
+                    account.Type === 'liability'
+
+                );
+
+                
+
+                this.displayExistingAccounts(existingAssets, existingLiabilities);
+
+            }
+
+        } catch (error) {
+
+            console.error('Error checking existing accounts:', error);
+
+        }
+
+    }
+
+
+
+    displayExistingAccounts(assets, liabilities) {
+
+        const container = document.getElementById('existing-accounts-section');
+
+        const list = document.getElementById('existing-accounts-list');
+
+
+
+        if (!container || !list) return;
+
+
+
+        list.innerHTML = '';
+
+
+
+        if (assets.length === 0 && liabilities.length === 0) {
+
+            list.innerHTML = '<p style="color: #64748b; font-style: italic;">No existing accounts found for this entity.</p>';
+
+        } else {
+
+            if (assets.length > 0) {
+
+                const assetTitle = document.createElement('h6');
+
+                assetTitle.textContent = 'Existing Asset Accounts:';
+
+                assetTitle.style.color = '#059669';
+
+                assetTitle.style.marginBottom = '10px';
+
+                list.appendChild(assetTitle);
+
+
+
+                assets.forEach(account => {
+
+                    const item = document.createElement('div');
+
+                    item.className = 'existing-account-item';
+
+                    item.style.cssText = 'background: #f0fdf4; padding: 8px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid #059669;';
+
+                    item.innerHTML = `
+
+                        <strong>${account['Account Name']}</strong><br>
+
+                        <small>Type: ${account.Type} | Balance: $${parseFloat(account.Balance || 0).toFixed(2)} | Code: ${account.code}</small>
+
+                    `;
+
+                    list.appendChild(item);
+
+                });
+
+            }
+
+
+
+            if (liabilities.length > 0) {
+
+                const liabilityTitle = document.createElement('h6');
+
+                liabilityTitle.textContent = 'Existing Liability Accounts:';
+
+                liabilityTitle.style.color = '#dc2626';
+
+                liabilityTitle.style.marginBottom = '10px';
+
+                liabilityTitle.style.marginTop = '15px';
+
+                list.appendChild(liabilityTitle);
+
+
+
+                liabilities.forEach(account => {
+
+                    const item = document.createElement('div');
+
+                    item.className = 'existing-account-item';
+
+                    item.style.cssText = 'background: #fef2f2; padding: 8px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid #dc2626;';
+
+                    item.innerHTML = `
+
+                        <strong>${account['Account Name']}</strong><br>
+
+                        <small>Type: ${account.Type} | Balance: $${parseFloat(account.Balance || 0).toFixed(2)} | Code: ${account.code}</small>
+
+                    `;
+
+                    list.appendChild(item);
+
+                });
+
+            }
+
+        }
+
+
+
+        container.style.display = 'block';
+
+    }
+
+
+
     async submitTransaction() {
 
         let transactionData;
@@ -528,6 +811,16 @@ class TransactionManager {
             if (transactionData) {
 
                 await this.createExternalInvestment(transactionData);
+
+            }
+
+        } else if (this.currentTransactionType === 'liability') {
+
+            transactionData = this.validateLiability();
+
+            if (transactionData) {
+
+                await this.createLiability(transactionData);
 
             }
 
@@ -586,6 +879,58 @@ class TransactionManager {
         } catch (error) {
 
             console.error('External investment submission error:', error);
+
+            this.showAlert('danger', 'Network error. Please try again.');
+
+        } finally {
+
+            this.setSubmitButtonLoading(false);
+
+        }
+
+    }
+
+
+
+    async createLiability(transactionData) {
+
+        try {
+
+            this.setSubmitButtonLoading(true);
+
+
+
+            const result = await apiService.createLiability(transactionData);
+
+
+
+            if (result.success) {
+
+                this.showAlert('success', result.message || 'Liability and corresponding asset created successfully!');
+
+                this.hideTransactionModal();
+
+                this.loadAccounts(); // Reload accounts to update balances
+
+                
+
+                // Refresh transactions list if function exists
+
+                if (window.transactionsPage && window.transactionsPage.loadData) {
+
+                    window.transactionsPage.loadData();
+
+                }
+
+            } else {
+
+                this.showAlert('danger', result.message || 'Failed to create liability');
+
+            }
+
+        } catch (error) {
+
+            console.error('Liability submission error:', error);
 
             this.showAlert('danger', 'Network error. Please try again.');
 
@@ -739,6 +1084,9 @@ class TransactionManager {
 
             document.body.style.overflow = 'hidden';
 
+            // Load accounts when modal opens
+            this.loadAccounts();
+
         }
 
     }
@@ -810,6 +1158,40 @@ class TransactionManager {
         if (microAmount) microAmount.value = '';
 
         if (microDescription) microDescription.value = 'Micro transaction between accounts';
+
+        
+
+        // Reset liability form
+
+        const liabilityName = document.getElementById('liability-name');
+
+        const liabilityType = document.getElementById('liability-type');
+
+        const liabilityAmount = document.getElementById('liability-amount');
+
+        const liabilityInterestRate = document.getElementById('liability-interest-rate');
+
+        const liabilityDescription = document.getElementById('liability-description');
+
+        const liabilityCompanyId = document.getElementById('liability-company-id');
+
+        const existingAccountsSection = document.getElementById('existing-accounts-section');
+
+        
+
+        if (liabilityName) liabilityName.value = '';
+
+        if (liabilityType) liabilityType.value = '';
+
+        if (liabilityAmount) liabilityAmount.value = '';
+
+        if (liabilityInterestRate) liabilityInterestRate.value = '0';
+
+        if (liabilityDescription) liabilityDescription.value = 'Liability created with corresponding asset';
+
+        if (liabilityCompanyId) liabilityCompanyId.value = this.getCurrentCompanyId() || '1';
+
+        if (existingAccountsSection) existingAccountsSection.style.display = 'none';
 
         
 
@@ -1078,11 +1460,20 @@ class TransactionsPage {
             <td><span class="status-badge status-${transaction.Status}">${transaction.Status}</span></td>
 
             <td>
-
-                <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${transaction.id}">Edit</button>
-
-                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${transaction.id}">Delete</button>
-
+ 
+                ${transaction.Status === 'draft' || transaction.Status === 'pending' ? 
+                    `<button class="btn btn-sm btn-outline-warning edit-btn" data-id="${transaction.id}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>` : 
+                    `<span class="text-muted" style="font-size: 0.875rem;">
+                        <i class="fas fa-lock"></i> Posted
+                    </span>`
+                }
+ 
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${transaction.id}">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+ 
             </td>
 
         `;

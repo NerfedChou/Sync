@@ -6,25 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="39448abd-8dc7-4bbb-a102-e7da966d7ebc" name="Changes" comment="Test">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/accounts/create.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/accounts/create.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/accounts/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/accounts/index.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/accounts/update.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/accounts/update.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysql/transaction_types.sql" beforeDir="false" afterPath="$PROJECT_DIR$/mysql/transaction_types.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/php/api/dashboard/kpi.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/dashboard/kpi.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/dashboard/profit-loss.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/dashboard/profit-loss.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/dashboard/revenue-trends.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/dashboard/revenue-trends.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/php/api/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/index.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/transactions/create.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/transactions/create.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/transactions/delete.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/transactions/delete.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/php/api/transactions/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/transactions/index.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/api/transactions/update.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/transactions/update.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/config/database.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/config/database.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/config/response.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/config/response.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/accounts.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/accounts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/api/transactions/micro-transaction.php" beforeDir="false" afterPath="$PROJECT_DIR$/php/api/transactions/micro-transaction.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/main.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/accounts.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/accounts.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/dashboard.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/transactions.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/transactions.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/transactions.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/transactions.html" afterDir="false" />
     </list>
@@ -349,6 +340,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />

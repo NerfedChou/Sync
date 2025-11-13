@@ -45,21 +45,42 @@ try {
         AND (account_name LIKE '%Cash%' OR account_name LIKE '%Bank%' OR account_name LIKE '%Checking%' OR account_name LIKE '%Savings%')
     ";
     
+    // Additional queries for better KPI data
+    $totalAssetsSql = "
+        SELECT COALESCE(SUM(current_balance), 0) as totalAssets
+        FROM accounts 
+        WHERE company_id = ? AND is_active = 1 AND account_type = 'ASSET'
+    ";
+    
+    $totalLiabilitiesSql = "
+        SELECT COALESCE(SUM(current_balance), 0) as totalLiabilities
+        FROM accounts 
+        WHERE company_id = ? AND is_active = 1 AND account_type = 'LIABILITY'
+    ";
+    
     $revenueResult = $db->fetchOne($revenueSql, [$company_id]);
     $expenseResult = $db->fetchOne($expenseSql, [$company_id]);
     $cashResult = $db->fetchOne($cashSql, [$company_id]);
+    $totalAssetsResult = $db->fetchOne($totalAssetsSql, [$company_id]);
+    $totalLiabilitiesResult = $db->fetchOne($totalLiabilitiesSql, [$company_id]);
     
     $totalRevenue = (float)$revenueResult['totalRevenue'];
     $totalExpenses = (float)$expenseResult['totalExpenses'];
     $cashBalance = (float)$cashResult['cashBalance'];
+    $totalAssets = (float)$totalAssetsResult['totalAssets'];
+    $totalLiabilities = (float)$totalLiabilitiesResult['totalLiabilities'];
     $netProfit = $totalRevenue - $totalExpenses;
+    $totalEquity = $totalAssets - abs($totalLiabilities); // Equity = Assets - Liabilities
     
     // Format KPI data for frontend
     $kpiData = [
         'totalRevenue' => $totalRevenue,
         'totalExpenses' => $totalExpenses,
         'netProfit' => $netProfit,
-        'cashBalance' => $cashBalance
+        'cashBalance' => $cashBalance,
+        'totalAssets' => $totalAssets,
+        'totalLiabilities' => $totalLiabilities,
+        'totalEquity' => $totalEquity
     ];
     
     // Return success response
