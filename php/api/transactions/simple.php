@@ -12,16 +12,29 @@ try {
     $status = $_GET['status'] ?? null;
     $limit = $_GET['limit'] ?? 50;
     
-    // Build query for simplified transactions
-    $sql = "SELECT * FROM transactions_simple WHERE company_id = ?";
+    // Build query for simplified transactions using proper schema
+    $sql = "
+        SELECT 
+            t.transaction_id as id,
+            t.transaction_date as date,
+            t.description,
+            t.total_amount as amount,
+            t.status,
+            a.account_name as account,
+            a.account_type as type
+        FROM transactions t
+        LEFT JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        LEFT JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ?
+    ";
     $params = [$company_id];
     
     if ($status) {
-        $sql .= " AND status = ?";
+        $sql .= " AND t.status = ?";
         $params[] = $status;
     }
     
-    $sql .= " ORDER BY date DESC, created_at DESC LIMIT ?";
+    $sql .= " ORDER BY t.transaction_date DESC, t.created_at DESC LIMIT ?";
     $params[] = (int)$limit;
     
     // Execute query
@@ -31,10 +44,10 @@ try {
     $formattedTransactions = array_map(function($transaction) {
         return [
             'id' => (int)$transaction['id'],
-            'Name' => $transaction['name'],
+            'Name' => $transaction['account'],
             'Date' => $transaction['date'],
             'Description' => $transaction['description'],
-            'Category' => $transaction['category'],
+            'Category' => $transaction['type'],
             'Account' => $transaction['account'],
             'Amount' => (float)$transaction['amount'],
             'Status' => $transaction['status']

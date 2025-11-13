@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/response.php';
@@ -22,7 +21,7 @@ try {
     $pdo = $db->getConnection();
     
     // Check if account exists
-    $existingAccount = $db->fetchOne("SELECT * FROM accounts WHERE id = ?", [$accountId]);
+    $existingAccount = $db->fetchOne("SELECT * FROM accounts WHERE account_id = ?", [$accountId]);
     if (!$existingAccount) {
         Response::notFound("Account not found");
     }
@@ -37,8 +36,8 @@ try {
         Response::error("Cannot delete account with existing transactions. Consider deactivating it instead.", 409);
     }
     
-    // Soft delete (set is_active = 0)
-    $sql = "UPDATE accounts SET is_active = 0, updated_at = NOW() WHERE id = ?";
+    // Hard delete
+    $sql = "DELETE FROM accounts WHERE account_id = ?";
     $db->query($sql, [$accountId]);
     
     Response::success(null, "Account deleted successfully");

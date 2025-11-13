@@ -6,7 +6,7 @@
 class ReportsPage {
     constructor() {
         this.currentReport = 'profit-loss';
-        this.currentPeriod = 'current-month';
+        this.currentPeriod = 'yearly';
         this.currentFormat = 'web';
         this.reportData = null;
         this.charts = {};

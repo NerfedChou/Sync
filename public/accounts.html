@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <div id="modal-overlay" class="modal-overlay"></div>
     <div class="app-container">
         <header>
             <nav class="navbar" role="navigation" aria-label="Main navigation">
@@ -50,9 +51,7 @@
                     <h1>Accounts</h1>
                     <p>Manage your chart of accounts and balances</p>
                 </div>
-                <button class="btn btn-primary" id="add-account-btn" aria-label="Add new account">
-                    <i class="fas fa-plus" aria-hidden="true"></i> Add Account
-                </button>
+                <!-- Account creation removed - accounts only created through transactions -->
             </section>
 
             <section class="account-statistics" aria-labelledby="stats-heading">
@@ -148,6 +147,8 @@
             </header>
             <div class="modal-body">
                 <form id="account-form" aria-labelledby="modal-title">
+                    <input type="hidden" id="account-id">
+                    <input type="hidden" id="company-id" value="1">
                     <div class="form-group">
                         <label for="account-name">Account Name</label>
                         <input type="text" id="account-name" required aria-describedby="account-name-help">
@@ -177,7 +178,7 @@
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="cancel-account-btn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Account</button>
+                        <button type="submit" class="btn btn-primary" id="save-account-btn">Save Account</button>
                     </div>
                 </form>
             </div>
@@ -187,9 +188,9 @@
     <div id="toast-container" role="alert" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/currency.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/accounts.js"></script>
 </body>
 </html>

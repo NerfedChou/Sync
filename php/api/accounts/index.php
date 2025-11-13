@@ -14,44 +14,49 @@ try {
         Response::error("company_id parameter is required", 400);
     }
     
-    // Query for accounts with calculated balances
+    // Simple query for accounts
     $sql = "
         SELECT 
-            a.id,
-            a.account_name as name,
-            a.account_code as code,
-            a.type,
-            a.description,
-            a.is_active as status,
-            COALESCE(
-                (SELECT SUM(CASE 
-                    WHEN tl.debit_amount > 0 THEN tl.debit_amount 
-                    ELSE -tl.credit_amount 
-                END)
-                FROM transaction_lines tl 
-                WHERE tl.account_id = a.id), 0
-            ) as balance
-        FROM accounts a 
-        WHERE a.company_id = ? AND a.is_active = 1
-        ORDER BY a.account_code, a.account_name
+            account_id as id,
+            account_name as name,
+            account_code as code,
+            account_type as type,
+            current_balance as balance,
+            is_active as status,
+            description
+        FROM accounts 
+        WHERE company_id = ? 
+        ORDER BY account_code, account_name
     ";
     
     $accounts = $db->fetchAll($sql, [$company_id]);
     
-    // Format accounts for frontend
+    // Simple format for frontend with INTUITIVE EXPENSE DISPLAY
     $formattedAccounts = array_map(function($account) {
+        $balance = (float)$account['balance'];
+        $accountType = strtolower($account['type']);
+        
+        // For expense accounts, keep negative balance for intuitive display
+        // This shows "how much needs to be paid" rather than confusing accounting
+        if ($accountType === 'expense') {
+            // Keep the negative balance as-is for intuitive display
+            // -$100 means "$100 still needs to be paid"
+            $displayBalance = $balance;
+        } else {
+            $displayBalance = $balance;
+        }
+        
         return [
             'id' => (int)$account['id'],
-            'name' => $account['name'],
-            'code' => $account['code'] ?? '',
-            'type' => $account['type'],
-            'balance' => (float)$account['balance'],
-            'status' => $account['status'] ? 'active' : 'inactive',
+            'Account Name' => $account['name'],
+            'code' => $account['code'],
+            'Type' => $accountType,
+            'Balance' => $displayBalance,
+            'Status' => $account['status'] ? 'active' : 'inactive',
             'description' => $account['description'] ?? ''
         ];
     }, $accounts);
     
-    // Return success response
     Response::success($formattedAccounts, "Accounts retrieved successfully");
     
 } catch (Exception $e) {

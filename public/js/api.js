@@ -25,11 +25,22 @@ class ApiService {
         try {
             const response = await fetch(url, config);
             
+            // Clone the response to allow for multiple body reads
+            const responseClone = response.clone();
+            
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonError) {
+                // If JSON parsing fails, get text from the clone
+                const text = await responseClone.text();
+                throw new Error(`HTTP ${response.status}: ${text}`);
+            }
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(data.error || `HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
             return data;
         } catch (error) {
             console.error('API request failed:', error);
@@ -301,11 +312,11 @@ class ApiService {
     // Accounts endpoints
     async getAccounts(params = {}) {
         // Add company context if available
-        const companyId = window.app?.getCurrentCompanyId();
+        const companyId = window.app?.getCurrentCompanyId() || document.getElementById('company-id')?.value;
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/accounts/simple', params);
+        return this.get('/accounts', params);
     }
 
     async getAccount(id) {
@@ -314,9 +325,10 @@ class ApiService {
 
     async createAccount(accountData) {
         // Add company context if available
-        const companyId = window.app?.getCurrentCompanyId();
+        const companyId = window.app?.getCurrentCompanyId() || document.getElementById('company-id')?.value;
         if (companyId) {
-            accountData.company_id = companyId;
+            // Send company_id as query parameter
+            return this.post(`/accounts?company_id=${companyId}`, accountData);
         }
         return this.post('/accounts', accountData);
     }
@@ -336,13 +348,13 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/transactions/simple', params);
+        return this.get('/transactions', params);
     }
 
     async getTransaction(id) {
         return this.get(`/transactions/${id}`);
     }
-
+    
     async createTransaction(transactionData) {
         // Add company context if available
         const companyId = window.app?.getCurrentCompanyId();
@@ -350,6 +362,14 @@ class ApiService {
             transactionData.company_id = companyId;
         }
         return this.post('/transactions', transactionData);
+    }
+
+    async createExternalInvestment(investmentData) {
+        return this.post('/transactions/external-investment', investmentData);
+    }
+
+    async createMicroTransaction(transactionData) {
+        return this.post('/transactions/micro-transaction', transactionData);
     }
 
     async updateTransaction(id, transactionData) {

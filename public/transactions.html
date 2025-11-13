@@ -135,9 +135,10 @@
                                 <th scope="col"><input type="checkbox" id="select-all" aria-label="Select all transactions"></th>
                                 <th scope="col">Date</th>
                                 <th scope="col">Description</th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Account</th>
+                                <th scope="col">From Account</th>
+                                <th scope="col">To Account</th>
                                 <th scope="col">Amount</th>
+                                <th scope="col">Type</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Actions</th>
                             </tr>
@@ -169,75 +170,122 @@
                 <button class="close-btn" id="close-transaction-modal-btn" aria-label="Close transaction modal">&times;</button>
             </header>
             <div class="modal-body">
-                <form id="transaction-form" aria-labelledby="modal-title">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="transaction-date">Date</label>
-                            <input type="date" id="transaction-date" required aria-describedby="date-help">
-                            <small id="date-help" class="form-help">Select transaction date</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="transaction-type">Type</label>
-                            <select id="transaction-type" required aria-describedby="type-help">
-                                <option value="">Select Type</option>
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
-                            <small id="type-help" class="form-help">Choose income or expense</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="transaction-description">Description</label>
-                        <input type="text" id="transaction-description" required aria-describedby="description-help">
-                        <small id="description-help" class="form-help">Brief description of the transaction</small>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="transaction-category">Category</label>
-                            <select id="transaction-category" required aria-describedby="category-help">
-                                <option value="">Select Category</option>
-                                <option value="Revenue">Revenue</option>
-                                <option value="Salaries">Salaries</option>
-                                <option value="Rent">Rent</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Supplies">Supplies</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <small id="category-help" class="form-help">Select appropriate category</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="transaction-account">Account</label>
-                            <select id="transaction-account" required aria-describedby="account-help">
-                                <option value="">Select Account</option>
-                                <!-- Accounts will be populated by JavaScript -->
-                            </select>
-                            <small id="account-help" class="form-help">Choose the account for this transaction</small>
+                <!-- Transaction Type Selector -->
+                <div class="transaction-type-selector">
+                    <button class="type-btn active" data-type="external-investment">
+                        📥 External Investment
+                    </button>
+                    <button class="type-btn" data-type="micro-transaction">
+                        💸 Micro Transaction
+                    </button>
+                </div>
+
+                <!-- External Investment Form -->
+                <div id="external-investment-form" class="transaction-form active">
+                    <div class="form-section">
+                        <h6 class="mb-3">Investor Information</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="investor-name">Investor Name *</label>
+                                <input type="text" class="form-control" id="investor-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="investment-amount">Investment Amount ($) *</label>
+                                <input type="number" class="form-control" id="investment-amount" step="0.01" min="0.01" required>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="transaction-amount">Amount</label>
-                        <input type="number" id="transaction-amount" step="0.01" required aria-describedby="amount-help">
-                        <small id="amount-help" class="form-help">Enter transaction amount</small>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Equity Ownership</h6>
+                        <div class="form-group">
+                            <label for="ownership-percentage">Ownership Percentage (%) *</label>
+                            <input type="range" class="slider" id="ownership-percentage" min="0.1" max="100" step="0.1" value="10">
+                            <div class="percentage-display mt-2">
+                                <span id="percentage-value">10.0</span>% Ownership
+                            </div>
+                            <small class="form-help">This percentage determines the investor's share of company profits and equity.</small>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="transaction-status">Status</label>
-                        <select id="transaction-status" required aria-describedby="status-help">
-                            <option value="completed">Completed</option>
-                            <option value="pending">Pending</option>
-                        </select>
-                        <small id="status-help" class="form-help">Current status of the transaction</small>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Transaction Details</h6>
+                        <div class="form-group">
+                            <label for="external-date">Transaction Date *</label>
+                            <input type="date" class="form-control" id="external-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="external-description">Description *</label>
+                            <textarea class="form-control" id="external-description" rows="3" required>External investment from investor</textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="transaction-notes">Notes</label>
-                        <textarea id="transaction-notes" placeholder="Add notes..." rows="3" aria-describedby="notes-help"></textarea>
-                        <small id="notes-help" class="form-help">Optional additional notes</small>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> This transaction will automatically create:
+                        <ul class="mb-0 mt-2">
+                            <li>Asset account: "[Investor Name] - Bank Account"</li>
+                            <li>Equity account: "[Investor Name] - Equity Stake" with ownership percentage</li>
+                        </ul>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="cancel-transaction-btn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Transaction</button>
+                </div>
+
+                <!-- Micro Transaction Form -->
+                <div id="micro-transaction-form" class="transaction-form">
+                    <div class="form-section">
+                        <h6 class="mb-3">Transaction Accounts</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="from-account">From Account (Asset) *</label>
+                                <select class="form-control" id="from-account" required>
+                                    <option value="">Select asset account...</option>
+                                </select>
+                                <small class="form-help">Money will be deducted from this account</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="to-account">To Account (Liability/Expense) *</label>
+                                <select class="form-control" id="to-account" required>
+                                    <option value="">Select liability or expense account...</option>
+                                </select>
+                                <small class="form-help">Money will be credited to this account</small>
+                            </div>
+                        </div>
                     </div>
-                </form>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Transaction Details</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="micro-amount">Amount ($) *</label>
+                                <input type="number" class="form-control" id="micro-amount" step="0.01" min="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="micro-date">Transaction Date *</label>
+                                <input type="date" class="form-control" id="micro-date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="micro-description">Description *</label>
+                            <textarea class="form-control" id="micro-description" rows="3" required>Micro transaction between accounts</textarea>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Accounting Rules:</strong> This follows standard double-entry accounting where:
+                        <ul class="mb-0 mt-2">
+                            <li>Asset accounts decrease (credit)</li>
+                            <li>Liability/Expense accounts increase (debit)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-transaction-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submit-transaction">
+                        <i class="fas fa-save"></i> Create Transaction
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -245,9 +293,9 @@
     <div id="toast-container" role="alert" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/api.js"></script>
     <script src="js/currency.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/transactions.js"></script>
 </body>
 </html>

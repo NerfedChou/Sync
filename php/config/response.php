@@ -51,7 +51,10 @@ class Response {
         self::error($message, 422, $errors);
     }
     
-    public static function serverError($message = "Internal server error") {
+    public static function serverError($message = "Internal server error", $exception = null) {
+        if ($exception instanceof Exception) {
+            $message .= ": " . $exception->getMessage();
+        }
         self::error($message, 500);
     }
 }
