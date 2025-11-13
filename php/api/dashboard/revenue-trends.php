@@ -48,9 +48,9 @@ try {
     // For demo purposes, use first company if no company_id provided
     if (!$company_id) {
         try {
-            $companySql = "SELECT id FROM companies WHERE is_active =1 LIMIT 1";
+            $companySql = "SELECT company_id FROM companies WHERE is_active =1 LIMIT 1";
             $companyResult = $db->fetchOne($companySql);
-            $company_id = $companyResult['id'] ?? 1;
+            $company_id = $companyResult['company_id'] ?? 1;
         } catch (Exception $e) {
             $company_id = 1; // Fallback to company ID 1
         }
@@ -67,22 +67,20 @@ try {
     $dateFormat = getDateFormat($period);
     $groupBy = getGroupBy($period);
     
-    // Query for revenue trends from simplified transactions
+    // Query for revenue trends using main schema
     $sql = "
         SELECT 
-            DATE_FORMAT(date, '{$dateFormat}') as label,
-            SUM(CASE 
-                WHEN status = 'completed' 
-                AND (category LIKE '%Revenue%' OR account LIKE '%Revenue%') 
-                THEN amount ELSE 0 END
-            ) as data
-        FROM transactions_simple 
-        WHERE company_id = ? 
-            AND date BETWEEN ? AND ?
-            AND status = 'completed'
-            AND (category LIKE '%Revenue%' OR account LIKE '%Revenue%')
-        GROUP BY {$groupBy}, date
-        ORDER BY date
+            DATE_FORMAT(t.transaction_date, '{$dateFormat}') as label,
+            SUM(tl.credit_amount) as data
+        FROM transactions t
+        JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ? 
+            AND t.transaction_date BETWEEN ? AND ?
+            AND t.status = 'posted'
+            AND a.account_type = 'REVENUE'
+        GROUP BY {$groupBy}, t.transaction_date
+        ORDER BY t.transaction_date
         LIMIT 30
     ";
     

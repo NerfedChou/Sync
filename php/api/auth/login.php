@@ -16,30 +16,17 @@ try {
         Response::error("Invalid JSON input", 400);
     }
     
-    // Get credentials
-    $username = $input['username'] ?? '';
-    $password = $input['password'] ?? '';
-    
-    if (empty($username) || empty($password)) {
-        Response::error("Username and password are required", 400);
-    }
-    
+    // Passwordless login - just get the first admin user
     // Get database connection
     $db = new Database();
     $pdo = $db->getConnection();
     
-    // Query admin user (simple authentication)
-    $sql = "SELECT id, name FROM admin WHERE name = ? LIMIT 1";
-    $admin = $db->fetchOne($sql, [$username]);
+    // Query admin user (truly passwordless)
+    $sql = "SELECT id, name FROM admin LIMIT 1";
+    $admin = $db->fetchOne($sql);
     
     if (!$admin) {
-        Response::error("Invalid credentials", 401);
-    }
-    
-    // For now, accept any non-empty password (simplified for development)
-    // In production, you would hash and verify passwords
-    if (strlen($password) < 3) {
-        Response::error("Invalid credentials", 401);
+        Response::error("No admin user found", 404);
     }
     
     // Create simple session token
@@ -61,7 +48,7 @@ try {
             'name' => $admin['name']
         ],
         'expires' => $expires
-    ], "Login successful");
+    ], "Login successful (passwordless)");
     
 } catch (Exception $e) {
     error_log("Login endpoint error: " . $e->getMessage());

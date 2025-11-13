@@ -19,7 +19,6 @@ class AccountsPage {
             await this.loadAccounts();
             this.setupEventListeners();
             this.setupCurrencyChangeListener();
-            this.updateStatistics();
         } catch (error) {
             console.error('Failed to initialize accounts page:', error);
             this.showError('Failed to load accounts');
@@ -32,9 +31,12 @@ class AccountsPage {
     async loadAccounts() {
         try {
             const response = await apiService.getAccounts();
+            console.log('Accounts API response:', response);
             this.accounts = response.success ? response.data : response;
+            console.log('Accounts loaded:', this.accounts);
             this.filteredAccounts = [...this.accounts];
             this.displayAccounts();
+            this.updateStatistics();
         } catch (error) {
             console.error('Error loading accounts:', error);
             this.showError('Failed to load accounts');
@@ -48,11 +50,14 @@ class AccountsPage {
      */
     displayAccounts() {
         const tbody = document.getElementById('accounts-tbody');
+        console.log('Display accounts, tbody:', tbody);
+        console.log('Filtered accounts length:', this.filteredAccounts.length);
         if (!tbody) return;
 
         tbody.innerHTML = '';
 
         if (this.filteredAccounts.length === 0) {
+            console.log('No accounts found');
             tbody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align: center; padding: 2rem; color: #64748b;">
@@ -63,6 +68,7 @@ class AccountsPage {
             return;
         }
 
+        console.log('Creating rows for accounts:', this.filteredAccounts);
         this.filteredAccounts.forEach(account => {
             const row = this.createAccountRow(account);
             tbody.appendChild(row);
@@ -78,6 +84,7 @@ class AccountsPage {
         const typeClass = this.getAccountTypeClass(account.Type);
         const statusClass = account.Status === 'active' ? 'status-badge--active' : 'status-badge--inactive';
         const balanceClass = account.Balance >= 0 ? 'text-green-600' : 'text-red-600';
+        const isActive = account.Status === 'active';
         
         row.innerHTML = `
             <td class="account-name">
@@ -95,9 +102,25 @@ class AccountsPage {
                 </span>
             </td>
             <td class="account-actions">
-                <button class="btn btn-actions">
-                    <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
-                </button>
+                <div class="action-dropdown">
+                    <button class="btn btn-actions" data-account-id="${account.id}" aria-label="Account actions">
+                        <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item edit-btn" data-account-id="${account.id}" aria-label="Edit account">
+                            <ion-icon name="create-outline"></ion-icon>
+                            Edit
+                        </button>
+                        <button class="dropdown-item toggle-status-btn" data-account-id="${account.id}" data-status="${isActive ? 'inactive' : 'active'}" aria-label="${isActive ? 'Deactivate account' : 'Activate account'}">
+                            <ion-icon name="${isActive ? 'pause-circle-outline' : 'play-circle-outline'}"></ion-icon>
+                            ${isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="dropdown-item delete-btn" data-account-id="${account.id}" aria-label="Delete account">
+                            <ion-icon name="trash-outline"></ion-icon>
+                            Delete
+                        </button>
+                    </div>
+                </div>
             </td>
         `;
         
@@ -122,6 +145,7 @@ class AccountsPage {
      * Format account type for display
      */
     formatAccountType(type) {
+        if (!type) return '';
         return type.charAt(0).toUpperCase() + type.slice(1);
     }
 
@@ -148,6 +172,8 @@ class AccountsPage {
         this.accounts.forEach(account => {
             const type = account.Type;
             const balance = account.Balance;
+            
+            if (!type || balance === undefined || balance === null) return;
             
             switch (type.toLowerCase()) {
                 case 'asset':
@@ -191,8 +217,115 @@ class AccountsPage {
             typeFilter.addEventListener('change', (e) => this.filterByType(e.target.value));
         }
 
+        // Action dropdown handlers (using event delegation)
+        this.setupActionHandlers();
+
         // Modal controls
         this.setupModalListeners();
+    }
+
+    /**
+     * Setup action dropdown handlers
+     */
+    setupActionHandlers() {
+        const tbody = document.getElementById('accounts-tbody');
+        
+        // Use event delegation for dynamic content
+        tbody.addEventListener('click', (e) => {
+            const target = e.target.closest('.dropdown-item, .btn-actions');
+            
+            if (!target) return;
+            
+            if (target.classList.contains('btn-actions')) {
+                // Toggle dropdown
+                e.stopPropagation();
+                this.toggleDropdown(target);
+            } else if (target.classList.contains('edit-btn')) {
+                // Edit account
+                const accountId = target.dataset.accountId;
+                this.editAccount(parseInt(accountId));
+                this.closeAllDropdowns();
+            } else if (target.classList.contains('toggle-status-btn')) {
+                // Toggle account status
+                const accountId = target.dataset.accountId;
+                const newStatus = target.dataset.status;
+                this.toggleAccountStatus(parseInt(accountId), newStatus);
+                this.closeAllDropdowns();
+            } else if (target.classList.contains('delete-btn')) {
+                // Delete account
+                const accountId = target.dataset.accountId;
+                this.deleteAccount(parseInt(accountId));
+                this.closeAllDropdowns();
+            }
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-dropdown')) {
+                this.closeAllDropdowns();
+            }
+        });
+
+        // Close dropdowns on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllDropdowns();
+            }
+        });
+    }
+
+    /**
+     * Toggle dropdown menu
+     */
+    toggleDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('dropdown-menu--active');
+        
+        // Close all other dropdowns
+        this.closeAllDropdowns();
+        
+        // Toggle current dropdown
+        if (!isOpen) {
+            dropdown.classList.add('dropdown-menu--active');
+            button.setAttribute('aria-expanded', 'true');
+            this.adjustDropdownPosition(dropdown);
+        }
+    }
+
+    /**
+     * Adjust dropdown position to prevent viewport overflow
+     */
+    adjustDropdownPosition(dropdown) {
+        // Reset classes
+        dropdown.classList.remove('dropdown-menu--top', 'dropdown-menu--left');
+        
+        // Get dropdown and button dimensions
+        const dropdownRect = dropdown.getBoundingClientRect();
+        const buttonRect = dropdown.previousElementSibling.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // Check if dropdown goes below viewport
+        if (dropdownRect.bottom > viewportHeight - 10) {
+            dropdown.classList.add('dropdown-menu--top');
+        }
+        
+        // Check if dropdown goes beyond right edge (with some padding)
+        if (dropdownRect.right > viewportWidth - 10) {
+            dropdown.classList.add('dropdown-menu--left');
+        }
+    }
+
+    /**
+     * Close all dropdown menus
+     */
+    closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-menu--active').forEach(menu => {
+            menu.classList.remove('dropdown-menu--active');
+        });
+        document.querySelectorAll('.btn-actions').forEach(btn => {
+            btn.setAttribute('aria-expanded', 'false');
+        });
     }
 
     /**
@@ -233,10 +366,11 @@ class AccountsPage {
      */
     showAccountModal(account = null) {
         const modal = document.getElementById('account-modal');
+        const overlay = document.getElementById('modal-overlay');
         const title = document.getElementById('modal-title');
         const form = document.getElementById('account-form');
 
-        if (!modal || !title || !form) return;
+        if (!modal || !overlay || !title || !form) return;
 
         // Reset form
         form.reset();
@@ -244,19 +378,28 @@ class AccountsPage {
 
         if (account) {
             // Edit mode
-            title.textContent = 'Edit Account';
             this.currentEditId = account.id;
-            
+            title.textContent = 'Edit Account';
+            const saveBtn = document.getElementById('save-account-btn');
+            if (saveBtn) {
+                saveBtn.textContent = 'Save Account';
+            }
+            document.getElementById('account-id').value = account.id;
             document.getElementById('account-name').value = account['Account Name'];
             document.getElementById('account-type').value = account.Type;
             document.getElementById('account-balance').value = Math.abs(account.Balance);
-            document.getElementById('account-description').value = '';
+            document.getElementById('account-description').value = account.description || '';
         } else {
             // Add mode
-            title.textContent = 'Add New Account';
+            title.textContent = 'Add Account';
+            const saveBtn = document.getElementById('save-account-btn');
+            if (saveBtn) {
+                saveBtn.textContent = 'Add Account';
+            }
         }
 
         modal.classList.add('modal--active');
+        overlay.classList.add('modal--active');
         document.body.style.overflow = 'hidden';
     }
 
@@ -265,9 +408,11 @@ class AccountsPage {
      */
     hideAccountModal() {
         const modal = document.getElementById('account-modal');
-        if (!modal) return;
+        const overlay = document.getElementById('modal-overlay');
+        if (!modal || !overlay) return;
 
         modal.classList.remove('modal--active');
+        overlay.classList.remove('modal--active');
         document.body.style.overflow = '';
         this.currentEditId = null;
     }
@@ -283,6 +428,23 @@ class AccountsPage {
     }
 
     /**
+     * Toggle account status
+     */
+    async toggleAccountStatus(id, newStatus) {
+        try {
+            const isActive = newStatus === 'active';
+            await apiService.updateAccount(id, { is_active: isActive });
+            this.showSuccess(`Account ${isActive ? 'activated' : 'deactivated'} successfully`);
+            
+            // Requery all data from server to get fresh data
+            await this.loadAccounts();
+        } catch (error) {
+            console.error('Error toggling account status:', error);
+            this.showError(`Failed to ${newStatus} account`);
+        }
+    }
+
+    /**
      * Delete account
      */
     async deleteAccount(id) {
@@ -292,11 +454,10 @@ class AccountsPage {
 
         try {
             await apiService.deleteAccount(id);
-            this.accounts = this.accounts.filter(acc => acc.id !== id);
-            this.filteredAccounts = this.filteredAccounts.filter(acc => acc.id !== id);
-            this.displayAccounts();
-            this.updateStatistics();
             this.showSuccess('Account deleted successfully');
+            
+            // Requery all data from server to get fresh data
+            await this.loadAccounts();
         } catch (error) {
             console.error('Error deleting account:', error);
             this.showError('Failed to delete account');
@@ -327,19 +488,15 @@ class AccountsPage {
             if (this.currentEditId) {
                 // Update existing account
                 await apiService.updateAccount(this.currentEditId, formData);
-                const index = this.accounts.findIndex(acc => acc.id === this.currentEditId);
-                this.accounts[index] = { ...this.accounts[index], ...formData };
                 this.showSuccess('Account updated successfully');
             } else {
                 // Create new account
-                const newAccount = await apiService.createAccount(formData);
-                this.accounts.push(newAccount);
+                await apiService.createAccount(formData);
                 this.showSuccess('Account created successfully');
             }
 
-            this.filteredAccounts = [...this.accounts];
-            this.displayAccounts();
-            this.updateStatistics();
+            // Requery all data from server to get fresh data
+            await this.loadAccounts();
             this.hideAccountModal();
         } catch (error) {
             console.error('Error saving account:', error);

@@ -1,4 +1,3 @@
-# Input Validation Helper
 <?php
 class Validation {
     public static function required($data, $fields) {

@@ -45,6 +45,26 @@ try {
     $action = $segments[1] ?? 'index';
     $id = $segments[2] ?? null;
 
+    // Handle REST-style routing for accounts
+    if ($resource === 'accounts' && isset($segments[1]) && is_numeric($segments[1])) {
+        // REST style: PUT /accounts/1 or DELETE /accounts/1
+        $id = $segments[1];
+        $method = $_SERVER['REQUEST_METHOD'];
+        
+        if ($method === 'PUT') {
+            $action = 'update';
+        } elseif ($method === 'DELETE') {
+            $action = 'delete';
+        } else {
+            $action = 'index';
+        }
+    }
+    
+    // Handle POST requests for creation
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'index') {
+        $action = 'create';
+    }
+
     switch ($resource) {
         case 'companies':
             routeToController('companies', $action, $id);

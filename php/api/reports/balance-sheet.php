@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/response.php';
@@ -21,7 +20,7 @@ try {
         Response::error("Invalid date format. Use Y-m-d", 400);
     }
     
-    // Get account balances from simplified accounts table
+    // Get account balances from main accounts table
     $balanceSql = "
         SELECT 
             account_id as id,
@@ -54,29 +53,26 @@ try {
             'balance' => $balance
         ];
         
-        switch ($account['account_type']) {
+        switch (strtolower($account['account_type'])) {
             case 'asset':
-                // Assets normally have debit balances
                 $assets[] = $accountData;
                 $totalAssets += $balance;
                 break;
                 
             case 'liability':
-                // Liabilities normally have credit balances (negative in our calculation)
                 $liabilities[] = $accountData;
-                $totalLiabilities += abs($balance);
+                $totalLiabilities += $balance;
                 break;
                 
             case 'equity':
-                // Equity normally has credit balances (negative in our calculation)
                 $equity[] = $accountData;
-                $totalEquity += abs($balance);
+                $totalEquity += $balance;
                 break;
                 
             case 'revenue':
                 // Revenue accounts affect equity
                 $equity[] = array_merge($accountData, ['name' => $account['account_name'] . ' (Revenue)']);
-                $totalEquity += abs($balance);
+                $totalEquity += $balance;
                 break;
                 
             case 'expense':

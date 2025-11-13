@@ -12,7 +12,7 @@ try {
     $account_type = $_GET['type'] ?? null;
     
     // Build query for simplified accounts
-    $sql = "SELECT account_id, account_name, account_type, current_balance, status 
+    $sql = "SELECT account_id, account_name, account_type, current_balance, is_active 
             FROM accounts 
             WHERE company_id = ? AND is_active = 1";
     $params = [$company_id];
@@ -32,9 +32,9 @@ try {
         return [
             'id' => (int)$account['account_id'],
             'Account Name' => $account['account_name'],
-            'Type' => $account['account_type'],
+            'Type' => strtolower($account['account_type']),
             'Balance' => (float)$account['current_balance'],
-            'Status' => $account['status']
+            'Status' => $account['is_active'] ? 'active' : 'inactive'
         ];
     }, $accounts);
     

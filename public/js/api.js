@@ -301,11 +301,11 @@ class ApiService {
     // Accounts endpoints
     async getAccounts(params = {}) {
         // Add company context if available
-        const companyId = window.app?.getCurrentCompanyId();
+        const companyId = window.app?.getCurrentCompanyId() || document.getElementById('company-id')?.value;
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/accounts/simple', params);
+        return this.get('/accounts', params);
     }
 
     async getAccount(id) {
@@ -314,9 +314,10 @@ class ApiService {
 
     async createAccount(accountData) {
         // Add company context if available
-        const companyId = window.app?.getCurrentCompanyId();
+        const companyId = window.app?.getCurrentCompanyId() || document.getElementById('company-id')?.value;
         if (companyId) {
-            accountData.company_id = companyId;
+            // Send company_id as query parameter
+            return this.post(`/accounts?company_id=${companyId}`, accountData);
         }
         return this.post('/accounts', accountData);
     }
@@ -336,7 +337,7 @@ class ApiService {
         if (companyId) {
             params.company_id = companyId;
         }
-        return this.get('/transactions/simple', params);
+        return this.get('/transactions', params);
     }
 
     async getTransaction(id) {

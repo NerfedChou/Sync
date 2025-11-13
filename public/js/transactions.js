@@ -22,7 +22,6 @@ class TransactionsPage {
             await this.loadData();
             this.setupEventListeners();
             this.setupCurrencyChangeListener();
-            this.updateStatistics();
         } catch (error) {
             console.error('Failed to initialize transactions page:', error);
             this.showError('Failed to load transactions');
@@ -42,6 +41,7 @@ class TransactionsPage {
             
             this.displayTransactions();
             this.populateAccountSelects();
+            this.updateStatistics();
         } catch (error) {
             console.error('Error loading data:', error);
             this.showError('Failed to load transactions data');
@@ -53,7 +53,7 @@ class TransactionsPage {
      */
     async loadTransactions() {
         const response = await apiService.getTransactions();
-        this.transactions = response.success ? response.data : response;
+        this.transactions = response.success ? response.data.data : response.data;
         this.filteredTransactions = [...this.transactions];
         return this.transactions;
     }
@@ -487,11 +487,10 @@ class TransactionsPage {
 
         try {
             await apiService.deleteTransaction(id);
-            this.transactions = this.transactions.filter(t => t.id !== id);
-            this.filteredTransactions = this.filteredTransactions.filter(t => t.id !== id);
-            this.displayTransactions();
-            this.updateStatistics();
             this.showSuccess('Transaction deleted successfully');
+            
+            // Requery all data from server to get fresh data
+            await this.loadData();
         } catch (error) {
             console.error('Error deleting transaction:', error);
             this.showError('Failed to delete transaction');
@@ -515,29 +514,26 @@ class TransactionsPage {
             date: document.getElementById('transaction-date').value,
             type: apiType,
             description: document.getElementById('transaction-description').value,
-            account: document.getElementById('transaction-account').options[document.getElementById('transaction-account').selectedIndex].text,
+            account_id: parseInt(document.getElementById('transaction-account').value),
             category: document.getElementById('transaction-category').value,
             amount: amount,
-            notes: document.getElementById('transaction-notes').value || ''
+            notes: document.getElementById('transaction-notes').value || '',
+            company_id: parseInt(document.getElementById('company-id').value)
         };
 
         try {
             if (this.currentEditId) {
                 // Update existing transaction
                 await apiService.updateTransaction(this.currentEditId, formData);
-                const index = this.transactions.findIndex(t => t.id === this.currentEditId);
-                this.transactions[index] = { ...this.transactions[index], ...formData };
                 this.showSuccess('Transaction updated successfully');
             } else {
                 // Create new transaction
-                const newTransaction = await apiService.createTransaction(formData);
-                this.transactions.push(newTransaction);
+                await apiService.createTransaction(formData);
                 this.showSuccess('Transaction created successfully');
             }
 
-            this.filteredTransactions = [...this.transactions];
-            this.displayTransactions();
-            this.updateStatistics();
+            // Requery all data from server to get fresh data
+            await this.loadData();
             this.hideTransactionModal();
         } catch (error) {
             console.error('Error saving transaction:', error);

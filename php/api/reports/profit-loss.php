@@ -32,31 +32,37 @@ try {
             $startDate = date('Y-m-01');
     }
     
-    // Query revenue data from simplified transactions
+    // Query revenue data from main transactions
     $revenueSql = "
         SELECT 
-            COALESCE(SUM(amount), 0) as total,
-            category
-        FROM transactions_simple
-        WHERE company_id = ? 
-            AND date BETWEEN ? AND ?
-            AND (category LIKE '%Revenue%' OR category LIKE '%Income%' OR account LIKE '%Revenue%')
-        GROUP BY category
+            COALESCE(SUM(tl.credit_amount), 0) as total,
+            a.account_name as category
+        FROM transactions t
+        JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ? 
+            AND t.transaction_date BETWEEN ? AND ?
+            AND t.status = 'posted'
+            AND a.account_type = 'REVENUE'
+        GROUP BY a.account_id, a.account_name
         ORDER BY total DESC
     ";
     
     $revenueResults = $db->fetchAll($revenueSql, [$company_id, $startDate, $endDate]);
     
-    // Query expense data from simplified transactions
+    // Query expense data from main transactions
     $expenseSql = "
         SELECT 
-            COALESCE(SUM(ABS(amount)), 0) as total,
-            category
-        FROM transactions_simple
-        WHERE company_id = ? 
-            AND date BETWEEN ? AND ?
-            AND (category LIKE '%Expense%' OR category LIKE '%Cost%' OR account LIKE '%Expense%')
-        GROUP BY category
+            COALESCE(SUM(tl.debit_amount), 0) as total,
+            a.account_name as category
+        FROM transactions t
+        JOIN transaction_lines tl ON t.transaction_id = tl.transaction_id
+        JOIN accounts a ON tl.account_id = a.account_id
+        WHERE t.company_id = ? 
+            AND t.transaction_date BETWEEN ? AND ?
+            AND t.status = 'posted'
+            AND a.account_type = 'EXPENSE'
+        GROUP BY a.account_id, a.account_name
         ORDER BY total DESC
     ";
     

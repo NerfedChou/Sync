@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/response.php';
@@ -30,7 +29,7 @@ try {
     $pdo = $db->getConnection();
     
     // Check if account exists
-    $existingAccount = $db->fetchOne("SELECT * FROM accounts WHERE id = ?", [$accountId]);
+    $existingAccount = $db->fetchOne("SELECT * FROM accounts WHERE account_id = ?", [$accountId]);
     if (!$existingAccount) {
         Response::notFound("Account not found");
     }
@@ -65,7 +64,7 @@ try {
     }
     
     if (isset($input['type'])) {
-        $updateFields[] = "type = ?";
+        $updateFields[] = "account_type = ?";
         $params[] = Validation::sanitize($input['type']);
     }
     
@@ -74,9 +73,16 @@ try {
         $params[] = Validation::sanitize($input['description']);
     }
     
+    if (isset($input['balance'])) {
+        $updateFields[] = "current_balance = ?";
+        $updateFields[] = "opening_balance = ?";
+        $params[] = (float)$input['balance'];
+        $params[] = (float)$input['balance'];
+    }
+    
     if (isset($input['is_active'])) {
         $updateFields[] = "is_active = ?";
-        $params[] = (bool)$input['is_active'];
+        $params[] = $input['is_active'] === 'true' || $input['is_active'] === true ? 1 : 0;
     }
     
     if (empty($updateFields)) {
@@ -87,30 +93,24 @@ try {
     $params[] = $accountId;
     
     // Update account
-    $sql = "UPDATE accounts SET " . implode(", ", $updateFields) . ", updated_at = NOW() WHERE id = ?";
+    $sql = "UPDATE accounts SET " . implode(", ", $updateFields) . ", updated_at = NOW() WHERE account_id = ?";
+    error_log("Update SQL: " . $sql);
+    error_log("Update params: " . json_encode($params));
     $db->query($sql, $params);
     
     // Get updated account
-    $updatedAccount = $db->fetchOne("SELECT * FROM accounts WHERE id = ?", [$accountId]);
+    $updatedAccount = $db->fetchOne("SELECT * FROM accounts WHERE account_id = ?", [$accountId]);
     
-    // Calculate current balance
-    $balanceSql = "
-        SELECT COALESCE(SUM(CASE 
-            WHEN tl.debit_amount > 0 THEN tl.debit_amount 
-            ELSE -tl.credit_amount 
-        END), 0) as balance
-        FROM transaction_lines tl 
-        WHERE tl.account_id = ?
-    ";
-    $balanceResult = $db->fetchOne($balanceSql, [$accountId]);
+    // Get the balance that was updated or current balance
+    $balance = isset($input['balance']) ? (float)$input['balance'] : (float)$updatedAccount['current_balance'];
     
     // Format response
     $accountData = [
-        'id' => (int)$updatedAccount['id'],
+        'id' => (int)$updatedAccount['account_id'],
         'name' => $updatedAccount['account_name'],
         'code' => $updatedAccount['account_code'],
-        'type' => $updatedAccount['type'],
-        'balance' => (float)$balanceResult['balance'],
+        'type' => strtolower($updatedAccount['account_type']),
+        'balance' => $balance,
         'status' => $updatedAccount['is_active'] ? 'active' : 'inactive',
         'description' => $updatedAccount['description'] ?? ''
     ];
