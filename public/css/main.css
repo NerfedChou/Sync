@@ -22,7 +22,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Poppins', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.5;
@@ -143,6 +143,20 @@ body {
   margin-top: 0.25rem;
 }
 
+#revenue-period {
+    width: 30%;
+    padding: 0.5rem;
+    margin-right: 1rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+.period-selector {
+    display: flex;
+    width: 100%;
+    justify-content: end;
+}
+
 .header-actions {
   display: flex;
   gap: 1rem;
@@ -181,6 +195,13 @@ body {
 .btn-secondary:hover {
   background: #475569;
 }
+/*Text Color*/
+
+.text-green-600 {
+    color: green;
+}
+
+/*Transactions*/
 
 /* Stats Grid */
 .stats-grid {
@@ -385,6 +406,10 @@ body {
   font-size: 0.875rem;
 }
 
+.checkbox-label input {
+    width: auto;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -411,7 +436,7 @@ body {
 /* Toast Notifications */
 #toast-container {
   position: fixed;
-  top: 20px;
+  top: 40px;
   right: 20px;
   z-index: 1001;
 }
@@ -476,6 +501,8 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 0.5rem;
+    width: 100%;
+    border: 1px solid var(--border-color);
   color: var(--text-muted);
 }
 
@@ -760,6 +787,7 @@ canvas {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  width: 100%;
 }
 
 .table-controls h3 {
@@ -786,4 +814,19 @@ canvas {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
+}
+
+.visually-hidden {
+    display: none;
+}
+
+/*Utilities*/
+
+.center-flex {
+    padding-left: 3rem !important;
+}
+
+.btn-actions {
+    font-size: 25px;
+    background: none;
 }
