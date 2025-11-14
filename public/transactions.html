@@ -172,6 +172,9 @@
             <div class="modal-body">
                 <!-- Transaction Type Selector -->
                 <div class="transaction-type-selector">
+                    <button class="type-btn" data-type="create-asset">
+                        💰 Create Asset
+                    </button>
                     <button class="type-btn active" data-type="external-investment">
                         📥 External Investment
                     </button>
@@ -186,7 +189,7 @@
                 <!-- External Investment Form -->
                 <div id="external-investment-form" class="transaction-form active">
                     <div class="form-section">
-                        <h6 class="mb-3">Investor Information</h6>
+                        <h6 class="mb-3">Investment Information</h6>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="investor-name">Investor Name *</label>
@@ -196,6 +199,13 @@
                                 <label for="investment-amount">Investment Amount ($) *</label>
                                 <input type="number" class="form-control" id="investment-amount" step="0.01" min="0.01" required>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-asset">Target Asset Account *</label>
+                            <select class="form-control" id="target-asset" required>
+                                <option value="">Select asset account to receive funds...</option>
+                            </select>
+                            <small class="form-help">Existing asset account where investment funds will be deposited</small>
                         </div>
                     </div>
 
@@ -225,11 +235,81 @@
 
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Note:</strong> This transaction will automatically create:
+                        <strong>Note:</strong> This transaction will:
                         <ul class="mb-0 mt-2">
-                            <li>Asset account: "[Investor Name] - Bank Account"</li>
-                            <li>Equity account: "[Investor Name] - Equity Stake" with ownership percentage</li>
+                            <li>Debit selected asset account with investment amount</li>
+                            <li>Create equity account: "[Investor Name] - Equity Stake" with ownership percentage</li>
                         </ul>
+                    </div>
+                </div>
+
+                <!-- Create Asset Form -->
+                <div id="create-asset-form" class="transaction-form">
+                    <div class="form-section">
+                        <h6 class="mb-3">💰 Asset Information</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="asset-name">Asset Name *</label>
+                                <input type="text" class="form-control" id="asset-name" required 
+                                       placeholder="e.g., Main Bank Account, Cash Reserve, Operating Account">
+                                <small class="form-help">Name of the asset account to create</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="asset-type">Asset Type *</label>
+                                <select class="form-control" id="asset-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="cash">Cash & Bank Accounts</option>
+                                    <option value="accounts_receivable">Accounts Receivable</option>
+                                    <option value="inventory">Inventory</option>
+                                    <option value="equipment">Equipment</option>
+                                    <option value="vehicles">Vehicles</option>
+                                    <option value="property">Property & Buildings</option>
+                                    <option value="investments">Investments</option>
+                                    <option value="other">Other Assets</option>
+                                </select>
+                                <small class="form-help">Type of asset being created</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6 class="mb-3">Transaction Details</h6>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="asset-date">Creation Date *</label>
+                                <input type="date" class="form-control" id="asset-date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="asset-description">Description *</label>
+                            <textarea class="form-control" id="asset-description" rows="3" required>Asset account created for tracking company funds</textarea>
+                            <small class="form-help">Describe the purpose and details of this asset account</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info alert-lg">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="font-size: 1rem; color: #047857; display: block; margin-bottom: 0.75rem;">💰 Asset Account Creation</strong>
+                                <div style="background: rgba(16, 185, 129, 0.1); border-radius: 8px; padding: 1rem;">
+                                    <div style="display: grid; gap: 0.75rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #10b981; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">ASSET</span>
+                                            <div>
+                                                <strong style="color: #047857;">"[Asset Name]"</strong>
+                                                <div style="color: #64748b; font-size: 0.875rem; font-style: italic;">e.g., "Main Bank Account", "Cash Reserve"</div>
+                                            </div>
+                                        </div>
+                                        <div style="color: #047857; font-size: 0.875rem; margin-top: 0.5rem;">
+                                            <i class="fas fa-info-circle"></i> <strong>Important:</strong> Asset accounts start with $0 balance. No money is created out of thin air.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -360,11 +440,7 @@
                                 <label for="liability-date">Transaction Date *</label>
                                 <input type="date" class="form-control" id="liability-date" required>
                             </div>
-                            <div class="form-group">
-                                <label for="liability-company-id">Company ID *</label>
-                                <input type="number" class="form-control" id="liability-company-id" min="1" value="1" required>
-                                <small class="form-help">Company to associate this liability with</small>
-                            </div>
+
                         </div>
                         <div class="form-group">
                             <label for="liability-description">Description *</label>

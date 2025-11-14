@@ -206,6 +206,9 @@ function routeToController($resource, $action, $id) {
         case 'investor-asset-protection':
             $file = $controllerPath . 'investor-asset-protection.php';
             break;
+        case 'create-asset':
+            $file = $controllerPath . 'create-asset.php';
+            break;
         default:
             Response::notFound("Action not found: {$action}");
     }

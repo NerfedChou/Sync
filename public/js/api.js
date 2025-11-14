@@ -343,7 +343,6 @@ class ApiService {
 
     // Transactions endpoints
     async getTransactions(params = {}) {
-        // Add company context if available
         const companyId = window.app?.getCurrentCompanyId();
         if (companyId) {
             params.company_id = companyId;
@@ -370,6 +369,14 @@ class ApiService {
 
     async createLiability(liabilityData) {
         return this.post('/transactions/liability', liabilityData);
+    }
+
+    /**
+     * Create Asset (POST)
+     */
+    async createAsset(data = {}) {
+        // POST to /transactions/create-asset
+        return this.post('/transactions/create-asset', data);
     }
 
     async createMicroTransaction(transactionData) {

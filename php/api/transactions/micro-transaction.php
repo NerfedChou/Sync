@@ -209,8 +209,10 @@ function updateAccountBalance($db, $account, $transactionType, $amount) {
             // INTUITIVE: For expense accounts, debit moves balance TOWARD zero
             $balanceChange = $amount;
         } elseif ($accountType === 'LIABILITY') {
-            // Debit liability reduces debt (moves balance toward zero, less negative)
-            $balanceChange = $amount;
+            // FIXED: Debit liability reduces debt (moves balance toward zero)
+            // Since liabilities are stored as positive numbers (amounts owed),
+            // debiting should REDUCE the balance
+            $balanceChange = -$amount;
         } else {
             $balanceChange = ($accountType === 'ASSET') ? $amount : -$amount;
         }
@@ -220,8 +222,10 @@ function updateAccountBalance($db, $account, $transactionType, $amount) {
             // Credit expense increases expense (moves balance away from zero, more negative)
             $balanceChange = -$amount;
         } elseif ($accountType === 'LIABILITY') {
-            // Credit liability increases debt (moves balance away from zero, more negative)
-            $balanceChange = -$amount;
+            // FIXED: Credit liability increases debt (moves balance away from zero)
+            // Since liabilities are stored as positive numbers (amounts owed),
+            // crediting should INCREASE the balance
+            $balanceChange = $amount;
         } else {
             $balanceChange = ($accountType === 'ASSET') ? -$amount : $amount;
         }
