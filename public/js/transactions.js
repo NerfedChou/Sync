@@ -325,8 +325,8 @@ class TransactionManager {
 
         
 
-        // Default fallback
-
+        // Default fallback - should not happen if company is properly selected
+        console.warn('No company ID found - defaulting to 1');
         return 1;
 
     }
@@ -375,57 +375,39 @@ class TransactionManager {
     populateAccountSelects() {
 
         // Populate from account (assets only)
-
         const fromSelect = document.getElementById('from-account');
-
         if (fromSelect) {
-
             fromSelect.innerHTML = '<option value="">Select asset account...</option>';
-
-            
-
             this.accounts.assets.forEach(account => {
-
                 const option = document.createElement('option');
-
                 option.value = account.account_id || account.id;
-
                 option.textContent = `${account.account_name || account['Account Name']} (${parseFloat(account.current_balance || account.Balance || 0).toFixed(2)})`;
-
                 fromSelect.appendChild(option);
-
             });
-
         }
-
-
-
         // Populate to account (liabilities + expenses)
-
         const toSelect = document.getElementById('to-account');
-
         if (toSelect) {
-
             toSelect.innerHTML = '<option value="">Select liability or expense account...</option>';
-
-            
-
             const liabilityAndExpenseAccounts = [...this.accounts.liabilities, ...this.accounts.expenses];
-
             liabilityAndExpenseAccounts.forEach(account => {
-
                 const option = document.createElement('option');
-
                 option.value = account.account_id || account.id;
-
                 option.textContent = `${account.account_name || account['Account Name']} (${parseFloat(account.current_balance || account.Balance || 0).toFixed(2)})`;
-
                 toSelect.appendChild(option);
-
             });
-
         }
-
+        // Populate target asset for external investment
+        const targetAssetSelect = document.getElementById('target-asset');
+        if (targetAssetSelect) {
+            targetAssetSelect.innerHTML = '<option value="">Select asset account to receive funds...</option>';
+            this.accounts.assets.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.account_id || account.id;
+                option.textContent = `${account.account_name || account['Account Name']} (${parseFloat(account.current_balance || account.Balance || 0).toFixed(2)})`;
+                targetAssetSelect.appendChild(option);
+            });
+        }
     }
 
 
@@ -433,15 +415,11 @@ class TransactionManager {
     validateExternalInvestment() {
 
         const investorName = document.getElementById('investor-name')?.value?.trim();
-
         const amount = parseFloat(document.getElementById('investment-amount')?.value);
-
         const percentage = parseFloat(document.getElementById('ownership-percentage')?.value);
-
         const date = document.getElementById('external-date')?.value;
-
         const description = document.getElementById('external-description')?.value?.trim();
-
+        const targetAssetId = document.getElementById('target-asset')?.value;
         const companyId = this.getCurrentCompanyId();
 
 
@@ -451,45 +429,31 @@ class TransactionManager {
 
 
         if (!investorName) errors.push('Investor name is required');
-
         if (!amount || amount <= 0) errors.push('Investment amount must be greater than 0');
-
         if (!percentage || percentage <= 0 || percentage > 100) errors.push('Ownership percentage must be between 0.1 and 100');
-
         if (!date) errors.push('Transaction date is required');
-
         if (!description) errors.push('Description is required');
-
+        if (!targetAssetId) errors.push('Target asset account is required');
         if (!companyId) errors.push('Company must be selected');
 
 
 
         if (errors.length > 0) {
-
             this.showAlert('danger', errors.join('<br>'));
-
             return false;
-
         }
 
 
 
         return {
-
             investor_name: investorName,
-
             amount: amount,
-
             ownership_percentage: percentage,
-
             date: date,
-
             description: description,
-
+            target_asset_id: parseInt(targetAssetId),
             company_id: companyId
-
         };
-
     }
 
 
@@ -560,6 +524,35 @@ class TransactionManager {
 
 
 
+    validateCreateAsset() {
+        const assetName = document.getElementById('asset-name')?.value?.trim();
+        const assetType = document.getElementById('asset-type')?.value;
+        const date = document.getElementById('asset-date')?.value;
+        const description = document.getElementById('asset-description')?.value?.trim();
+        const companyId = this.getCurrentCompanyId();
+
+        const errors = [];
+
+        if (!assetName) errors.push('Asset name is required');
+        if (!assetType) errors.push('Asset type is required');
+        if (!date) errors.push('Creation date is required');
+        if (!description) errors.push('Description is required');
+        if (!companyId) errors.push('Company must be selected');
+
+        if (errors.length > 0) {
+            this.showAlert('danger', errors.join('<br>'));
+            return false;
+        }
+
+        return {
+            asset_name: assetName,
+            asset_type: assetType,
+            date: date,
+            description: description,
+            company_id: companyId
+        };
+    }
+
     validateLiability() {
 
         const liabilityName = document.getElementById('liability-name')?.value?.trim();
@@ -574,7 +567,7 @@ class TransactionManager {
 
         const description = document.getElementById('liability-description')?.value?.trim();
 
-        const companyId = parseInt(document.getElementById('liability-company-id')?.value) || this.getCurrentCompanyId();
+        const companyId = this.getCurrentCompanyId();
 
 
 
@@ -650,13 +643,7 @@ class TransactionManager {
 
             if (response.success && response.data) {
 
-                const assetName = `${liabilityType.charAt(0).toUpperCase() + liabilityType.slice(1)} - ${liabilityName}`;
-
-                const liabilityNameFull = `${liabilityName} - ${liabilityType.charAt(0).toUpperCase() + liabilityType.slice(1)}`;
-
-                
-
-                const existingAssets = response.data.filter(account => 
+                const existingAssets = response.data.filter(account =>
 
                     account['Account Name'].toLowerCase().includes(liabilityName.toLowerCase()) && 
 
@@ -664,17 +651,13 @@ class TransactionManager {
 
                 );
 
-                
-
-                const existingLiabilities = response.data.filter(account => 
+                const existingLiabilities = response.data.filter(account =>
 
                     account['Account Name'].toLowerCase().includes(liabilityName.toLowerCase()) && 
 
                     account.Type === 'liability'
 
                 );
-
-                
 
                 this.displayExistingAccounts(existingAssets, existingLiabilities);
 
@@ -734,13 +717,9 @@ class TransactionManager {
 
                     item.style.cssText = 'background: #f0fdf4; padding: 8px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid #059669;';
 
-                    item.innerHTML = `
-
-                        <strong>${account['Account Name']}</strong><br>
-
-                        <small>Type: ${account.Type} | Balance: $${parseFloat(account.Balance || 0).toFixed(2)} | Code: ${account.code}</small>
-
-                    `;
+                    item.innerHTML = 
+                        "<strong>" + account["Account Name"] + "</strong><br>" +
+                        "<small>Type: " + account.Type + " | Balance: $" + parseFloat(account.Balance || 0).toFixed(2) + " | Code: " + account.code + "</small>"
 
                     list.appendChild(item);
 
@@ -774,15 +753,9 @@ class TransactionManager {
 
                     item.style.cssText = 'background: #fef2f2; padding: 8px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid #dc2626;';
 
-                    item.innerHTML = `
-
-                        <strong>${account['Account Name']}</strong><br>
-
-                        <small>Type: ${account.Type} | Balance: $${parseFloat(account.Balance || 0).toFixed(2)} | Code: ${account.code}</small>
-
-                    `;
-
-                    list.appendChild(item);
+                    item.innerHTML = 
+                        "<strong>" + account["Account Name"] + "</strong><br>" +
+                        "<small>Type: " + account.Type + " | Balance: $" + parseFloat(account.Balance || 0).toFixed(2) + " | Code: " + account.code + "</small>"
 
                 });
 
@@ -804,41 +777,57 @@ class TransactionManager {
 
 
 
-        if (this.currentTransactionType === 'external-investment') {
-
+        if (this.currentTransactionType === 'create-asset') {
+            transactionData = this.validateCreateAsset();
+            if (transactionData) {
+                await this.createAsset(transactionData);
+            }
+        } else if (this.currentTransactionType === 'external-investment') {
             transactionData = this.validateExternalInvestment();
-
             if (transactionData) {
-
                 await this.createExternalInvestment(transactionData);
-
             }
-
         } else if (this.currentTransactionType === 'liability') {
-
             transactionData = this.validateLiability();
-
             if (transactionData) {
-
                 await this.createLiability(transactionData);
-
             }
-
         } else {
-
             transactionData = this.validateMicroTransaction();
-
             if (transactionData) {
-
                 await this.createMicroTransaction(transactionData);
-
             }
-
         }
 
     }
 
 
+
+    async createAsset(transactionData) {
+        try {
+            this.setSubmitButtonLoading(true);
+
+            const result = await apiService.createAsset(transactionData);
+
+            if (result.success) {
+                this.showAlert('success', result.message || 'Asset account created successfully!');
+                this.hideTransactionModal();
+                this.loadAccounts(); // Reload accounts to update the list
+                
+                // Refresh transactions list if function exists
+                if (window.transactionsPage && window.transactionsPage.loadData) {
+                    window.transactionsPage.loadData();
+                }
+            } else {
+                this.showAlert('danger', result.message || 'Failed to create asset account');
+            }
+        } catch (error) {
+            console.error('Asset creation submission error:', error);
+            this.showAlert('danger', 'Network error. Please try again.');
+        } finally {
+            this.setSubmitButtonLoading(false);
+        }
+    }
 
     async createExternalInvestment(transactionData) {
 
@@ -1114,103 +1103,56 @@ class TransactionManager {
     resetForms() {
 
         // Reset external investment form
-
-        const investorName = document.getElementById('investor-name');
-
-        const investmentAmount = document.getElementById('investment-amount');
-
-        const ownershipPercentage = document.getElementById('ownership-percentage');
-
-        const percentageValue = document.getElementById('percentage-value');
-
-        const externalDescription = document.getElementById('external-description');
-
-        
-
+        let investorName = document.getElementById('investor-name');
+        let investmentAmount = document.getElementById('investment-amount');
+        let ownershipPercentage = document.getElementById('ownership-percentage');
+        let percentageValue = document.getElementById('percentage-value');
+        let externalDescription = document.getElementById('external-description');
         if (investorName) investorName.value = '';
-
         if (investmentAmount) investmentAmount.value = '';
-
         if (ownershipPercentage) ownershipPercentage.value = '10';
-
         if (percentageValue) percentageValue.textContent = '10.0';
-
         if (externalDescription) externalDescription.value = 'External investment from investor';
-
-        
-
         // Reset micro transaction form
-
-        const fromAccount = document.getElementById('from-account');
-
-        const toAccount = document.getElementById('to-account');
-
-        const microAmount = document.getElementById('micro-amount');
-
-        const microDescription = document.getElementById('micro-description');
-
-        
-
+        let fromAccount = document.getElementById('from-account');
+        let toAccount = document.getElementById('to-account');
+        let microAmount = document.getElementById('micro-amount');
+        let microDescription = document.getElementById('micro-description');
         if (fromAccount) fromAccount.value = '';
-
         if (toAccount) toAccount.value = '';
-
         if (microAmount) microAmount.value = '';
-
         if (microDescription) microDescription.value = 'Micro transaction between accounts';
-
-        
-
+        // Reset create asset form
+        let assetName = document.getElementById('asset-name');
+        let assetType = document.getElementById('asset-type');
+        let assetDate = document.getElementById('asset-date');
+        let assetDescription = document.getElementById('asset-description');
+        if (assetName) assetName.value = '';
+        if (assetType) assetType.value = '';
+        if (assetDate) assetDate.value = '';
+        if (assetDescription) assetDescription.value = 'Asset account created for tracking company funds';
+        let targetAsset = document.getElementById('target-asset');
+        if (targetAsset) targetAsset.value = '';
         // Reset liability form
-
-        const liabilityName = document.getElementById('liability-name');
-
-        const liabilityType = document.getElementById('liability-type');
-
-        const liabilityAmount = document.getElementById('liability-amount');
-
-        const liabilityInterestRate = document.getElementById('liability-interest-rate');
-
-        const liabilityDescription = document.getElementById('liability-description');
-
-        const liabilityCompanyId = document.getElementById('liability-company-id');
-
-        const existingAccountsSection = document.getElementById('existing-accounts-section');
-
-        
-
+        let liabilityName = document.getElementById('liability-name');
+        let liabilityType = document.getElementById('liability-type');
+        let liabilityAmount = document.getElementById('liability-amount');
+        let liabilityInterestRate = document.getElementById('liability-interest-rate');
+        let liabilityDescription = document.getElementById('liability-description');
+        let existingAccountsSection = document.getElementById('existing-accounts-section');
         if (liabilityName) liabilityName.value = '';
-
         if (liabilityType) liabilityType.value = '';
-
         if (liabilityAmount) liabilityAmount.value = '';
-
         if (liabilityInterestRate) liabilityInterestRate.value = '0';
-
         if (liabilityDescription) liabilityDescription.value = 'Liability created with corresponding asset';
-
-        if (liabilityCompanyId) liabilityCompanyId.value = this.getCurrentCompanyId() || '1';
-
         if (existingAccountsSection) existingAccountsSection.style.display = 'none';
-
-        
-
         // Reset date to today
-
         this.setDefaultDate();
-
-        
-
         // Clear any alerts
-
-        const alertContainer = document.getElementById('alert-container') || document.getElementById('toast-container');
-
+        let alertContainer = document.getElementById('alert-container') || document.getElementById('toast-container');
         if (alertContainer) {
-
             alertContainer.innerHTML = '';
-
         }
-
     }
 
 

@@ -184,8 +184,8 @@ function createOrGetAccount($db, $companyId, $accountName, $accountType, $initia
     }
     
     // Set initial balance based on account type
-    // For liabilities, balance should be negative to represent debt owed
-    $balance = ($accountType === 'LIABILITY') ? -$initialBalance : $initialBalance;
+    // For liabilities, balance is stored as positive number representing amount owed
+    $balance = $initialBalance;
     
     // Insert new account
     $sql = "
@@ -211,8 +211,10 @@ function updateAccountBalance($db, $accountId, $transactionType, $amount) {
         if ($accountType === 'EXPENSE') {
             $balanceChange = $amount;
         } elseif ($accountType === 'LIABILITY') {
-            // Debiting liability reduces the debt (moves toward zero)
-            $balanceChange = $amount;
+            // FIXED: Debit liability reduces debt (moves toward zero)
+            // Since liabilities are stored as positive numbers (amounts owed),
+            // debiting should REDUCE balance
+            $balanceChange = -$amount;
         } else {
             $balanceChange = ($accountType === 'ASSET') ? $amount : -$amount;
         }
@@ -221,8 +223,10 @@ function updateAccountBalance($db, $accountId, $transactionType, $amount) {
         if ($accountType === 'EXPENSE') {
             $balanceChange = -$amount;
         } elseif ($accountType === 'LIABILITY') {
-            // Crediting liability increases the debt (moves away from zero, more negative)
-            $balanceChange = -$amount;
+            // FIXED: Credit liability increases debt (moves away from zero)
+            // Since liabilities are stored as positive numbers (amounts owed),
+            // crediting should INCREASE balance
+            $balanceChange = $amount;
         } else {
             $balanceChange = ($accountType === 'ASSET') ? -$amount : $amount;
         }

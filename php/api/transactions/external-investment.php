@@ -15,7 +15,7 @@ try {
     }
     
 
-    $requiredFields = ['date', 'description', 'investor_name', 'amount', 'ownership_percentage', 'company_id'];
+    $requiredFields = ['date', 'description', 'investor_name', 'amount', 'ownership_percentage', 'target_asset_id', 'company_id'];
     foreach ($requiredFields as $field) {
         if (empty($input[$field])) {
             Response::error("Field '{$field}' is required", 400);
@@ -28,6 +28,7 @@ try {
     $investorName = trim($input['investor_name']);
     $amount = (float)($input['amount'] ?? 0);
     $ownershipPercentage = (float)($input['ownership_percentage'] ?? 0);
+    $targetAssetId = (int)($input['target_asset_id']);
     $company_id = (int)($input['company_id']);
     
 
@@ -94,24 +95,18 @@ try {
         
         $transaction_id = $db->lastInsertId();
         
-        // Create asset account for investor
-        $assetAccountName = $investorName . " - Bank Account";
-        $assetSql = "
-            INSERT INTO accounts (company_id, account_name, account_code, account_type, current_balance, investor_name, is_active, description, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, 1, ?, NOW())
-        ";
+        // Verify target asset exists
+        $targetAsset = $db->fetchOne(
+            "SELECT * FROM accounts WHERE account_id = ? AND company_id = ? AND account_type = 'ASSET' AND is_active = 1",
+            [$targetAssetId, $company_id]
+        );
         
-        $db->query($assetSql, [
-            $company_id,
-            $assetAccountName,
-            'EXT' . str_pad($transaction_id, 4, '0', STR_PAD_LEFT),
-            'ASSET',
-            $amount,
-            $investorName,
-            $description
-        ]);
+        if (!$targetAsset) {
+            $pdo->rollBack();
+            Response::error("Target asset account not found", 404);
+        }
         
-        $assetAccountId = $db->lastInsertId();
+        $assetAccountId = $targetAssetId;
         
         // Create equity account for investor
         $equityAccountName = $investorName . " - Equity Stake";
@@ -141,7 +136,7 @@ try {
         $db->query($lineSql, [
             $transaction_id,
             $assetAccountId,
-            $description . " (investment received)",
+            $description . " (investment from " . $investorName . ")",
             $amount,
             0,
             $transaction_id,
@@ -150,10 +145,12 @@ try {
             0,
             $amount
         ]);
-        
+        // Update asset account balance
+        $updateAssetSql = "UPDATE accounts SET current_balance = current_balance + ? WHERE account_id = ? AND company_id = ?";
+        $db->query($updateAssetSql, [$amount, $assetAccountId, $company_id]);
         // Commit transaction
         $pdo->commit();
-        
+
         // Get created transaction details
         $createdTransaction = $db->fetchOne("SELECT * FROM transactions WHERE transaction_id = ?", [$transaction_id]);
         
